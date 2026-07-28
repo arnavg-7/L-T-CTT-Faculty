@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L&T CTT — Faculty Portal · Sign in</title>
+<style>
+  :root{--bg:#EEF1F7;--card:#fff;--primary:#1B7EC2;--navy:#14285C;--ink:#212B38;--muted:#8A94A4;--line:#ECEFF5;
+    --grad:linear-gradient(135deg,#2BA6DA 0%,#1273BC 100%);--font:"SF Pro Rounded","Segoe UI",system-ui,-apple-system,Arial,sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);min-height:100vh;display:grid;place-items:center;padding:24px}
+  .box{width:100%;max-width:400px}
+  .brand{text-align:center;margin-bottom:26px}
+  .brand .lt{font-weight:800;font-size:24px;color:var(--navy);letter-spacing:.5px}
+  .brand .sub{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--primary);margin-top:5px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px 28px;box-shadow:0 1px 3px rgba(20,40,92,.05)}
+  .card h1{font-size:18px;font-weight:700}
+  .role{font-size:12px;color:var(--muted);margin-top:4px;margin-bottom:22px}
+  label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
+  input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#F5F7FB;color:var(--ink);font-size:13px;font-family:inherit;margin-bottom:16px}
+  input:focus{outline:none;border-color:var(--primary);background:#fff}
+  .btn{width:100%;padding:12px;border:none;border-radius:11px;background:var(--grad);color:#fff;font-weight:700;font-size:14px;font-family:inherit;cursor:pointer;box-shadow:0 5px 14px rgba(27,126,194,.28)}
+  .note{text-align:center;color:var(--muted);font-size:11px;margin-top:18px}
+</style>
+<div class="box">
+  <div class="brand"><div class="lt">L&amp;T CTT</div><div class="sub">SKILLING LMS</div></div>
+  <form class="card" onsubmit="location.href='index.html';return false;">
+    <h1>Sign in</h1>
+    <div class="role">Faculty Portal</div>
+    <label>Email / Faculty ID</label>
+    <input type="text" placeholder="mateen.shaikh.6788" autocomplete="off">
+    <label>Password</label>
+    <input type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="off">
+    <button class="btn" type="submit">Sign in</button>
+    <div class="note">Prototype — sign in to continue</div>
+  </form>
+</div>
+</html>

@@ -1021,7 +1021,7 @@ function openNewQModal(edit){
 /* ---------- EVENTS ---------- */
 document.addEventListener('click',e=>{
   if(e.target.id==='modal'){closeModal();return;}
-  if(e.target.closest('[data-exit]')){location.href='index.html';return;}
+  if(e.target.closest('[data-exit]')){location.href='signin.html';return;}
   if(e.target.closest('[data-mclose]')){closeModal();return;}
   if(e.target.closest('[data-mconfirm]')){const a=modalAction;closeModal();if(a)a();return;}
 
