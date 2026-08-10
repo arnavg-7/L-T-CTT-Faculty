@@ -1,0 +1,1155 @@
+<meta charset="utf-8">
+<title>CTT Skilling LMS — Faculty Portal</title>
+<style>
+  :root{
+    --bg:#EEF1F7; --card:#FFFFFF; --soft:#F5F7FB;
+    --primary:#1B7EC2; --primary-deep:#1273BC;
+    --grad:linear-gradient(135deg,#2BA6DA 0%,#1273BC 100%);
+    --navy:#14285C;
+    --ink:#212B38; --muted:#8A94A4; --faint:#B4BCCA;
+    --line:#ECEFF5;
+    --ok:#2E9E52; --ok-bg:#E8F5EC;
+    --warn:#C4881A; --warn-bg:#FBF3DE;
+    --bad:#DE4B3E; --bad-bg:#FBE9E7;
+    --chip-sky:#E9F2FB; --chip-sky-i:#2380C4;
+    --chip-green:#E8F5EC; --chip-green-i:#3AA35B;
+    --chip-amber:#FBF3DE; --chip-amber-i:#CE9526;
+    --chip-lav:#EDEBFA; --chip-lav-i:#6B5BD1;
+    --shadow:0 1px 3px rgba(20,40,92,.05);
+    --r:18px; --r-sm:13px;
+    --fs-pg:20px; --fs-sec:15px; --fs-body:13px; --fs-meta:11.5px; --fs-num:23px;
+    --font:"SF Pro Rounded","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  }
+  :root[data-theme="light"]{
+    --bg:#EEF1F7; --card:#FFFFFF; --soft:#F5F7FB; --primary:#1B7EC2; --primary-deep:#1273BC;
+    --grad:linear-gradient(135deg,#2BA6DA 0%,#1273BC 100%); --navy:#14285C;
+    --ink:#212B38; --muted:#8A94A4; --faint:#B4BCCA; --line:#ECEFF5;
+    --ok:#2E9E52; --ok-bg:#E8F5EC; --warn:#C4881A; --warn-bg:#FBF3DE; --bad:#DE4B3E; --bad-bg:#FBE9E7;
+    --chip-sky:#E9F2FB; --chip-sky-i:#2380C4; --chip-green:#E8F5EC; --chip-green-i:#3AA35B;
+    --chip-amber:#FBF3DE; --chip-amber-i:#CE9526; --chip-lav:#EDEBFA; --chip-lav-i:#6B5BD1;
+    --shadow:0 1px 3px rgba(20,40,92,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);
+    font-size:var(--fs-body);line-height:1.5;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select,textarea{font-family:inherit}
+  svg{display:block}
+
+  .app{display:grid;grid-template-columns:264px 1fr;min-height:100vh}
+
+  .sidebar{background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:28px 16px;position:sticky;top:0;height:100vh}
+  .profile{display:flex;flex-direction:column;align-items:center;text-align:center;padding:4px 0 26px}
+  .avatar{width:88px;height:88px;border-radius:50%;padding:3px;box-shadow:0 0 0 2.5px var(--primary);margin-bottom:12px}
+  .avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+  .profile .nm{font-size:var(--fs-sec);font-weight:600}
+  .profile .id{font-size:var(--fs-meta);color:var(--muted);margin-top:1px}
+  .nav{display:flex;flex-direction:column;gap:3px;flex:1;overflow-y:auto}
+  .nav a{display:flex;align-items:center;gap:13px;padding:10px 14px;border-radius:11px;color:var(--muted);font-weight:500;text-decoration:none;cursor:pointer;transition:.15s}
+  .nav a svg{width:18px;height:18px;flex:none;transition:.15s}
+  .nav a:hover{background:var(--soft);color:var(--ink)}
+  .nav a.active{background:var(--grad);color:#fff;font-weight:600;box-shadow:0 5px 14px rgba(27,126,194,.3)}
+  .nav .parent{display:flex;align-items:center;gap:13px;padding:10px 14px;border-radius:11px;color:var(--muted);font-weight:600;cursor:pointer;transition:.15s;margin-top:6px}
+  .nav .parent:first-child{margin-top:0}
+  .nav .parent:hover{background:var(--soft);color:var(--ink)}
+  .nav .parent .pi{width:18px;height:18px;flex:none}
+  .nav .parent .cv{margin-left:auto;width:16px;height:16px;color:var(--faint);transition:.2s}
+  .nav .parent.open .cv{transform:rotate(180deg)}
+  .nav .sub{display:none;flex-direction:column;gap:3px;margin:3px 0 4px}
+  .nav .parent.open + .sub{display:flex}
+  .nav .sub a{padding-left:32px}
+  .logout{margin-top:auto;padding-top:12px}
+
+  .main{padding:26px 30px 44px;min-width:0}
+  .topbar{display:flex;gap:16px;align-items:center;margin-bottom:26px}
+  .topbar h2{font-size:var(--fs-pg);font-weight:700;letter-spacing:-.3px}
+  .topbar .crumb{font-size:var(--fs-meta);color:var(--muted);margin-top:2px}
+  .top-actions{margin-left:auto;display:flex;align-items:center;gap:14px}
+  .top-actions .ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;color:var(--muted);background:var(--card);box-shadow:var(--shadow);cursor:pointer}
+  .top-actions .ico svg{width:18px;height:18px}
+  .brand{display:flex;flex-direction:column;align-items:center;line-height:1.05}
+  .brand .lt{font-weight:800;font-size:13px;color:var(--navy);letter-spacing:.4px}
+  .brand .sub{font-size:8px;font-weight:600;letter-spacing:1.4px;color:var(--primary);margin-top:2px}
+
+  .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 26px}
+  .grid{display:grid;gap:20px}
+  .g2{grid-template-columns:1.4fr 1fr}
+  .g2e{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px}
+  .head h3{font-size:var(--fs-sec);font-weight:600}
+  .link{color:var(--primary);font-weight:600;font-size:var(--fs-meta);text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+  .link svg{width:14px;height:14px}
+  .muted{color:var(--muted)}
+  .lbl{font-size:var(--fs-meta);color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+
+  .chip{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none}
+  .chip svg{width:20px;height:20px}
+  .c-sky{background:var(--chip-sky);color:var(--chip-sky-i)}
+  .c-green{background:var(--chip-green);color:var(--chip-green-i)}
+  .c-amber{background:var(--chip-amber);color:var(--chip-amber-i)}
+  .c-lav{background:var(--chip-lav);color:var(--chip-lav-i)}
+
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;font-size:var(--fs-meta);font-weight:600;line-height:1.4}
+  .pill svg{width:12px;height:12px}
+  .p-ok{background:var(--ok-bg);color:var(--ok)}
+  .p-warn{background:var(--warn-bg);color:var(--warn)}
+  .p-bad{background:var(--bad-bg);color:var(--bad)}
+  .p-neu{background:var(--soft);color:var(--muted)}
+  .p-info{background:var(--chip-sky);color:var(--chip-sky-i)}
+  .p-lav{background:var(--chip-lav);color:var(--chip-lav-i)}
+
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:11px;font-weight:600;font-size:var(--fs-body);transition:.15s}
+  .btn svg{width:15px;height:15px}
+  .btn-p{background:var(--grad);color:#fff;box-shadow:0 5px 14px rgba(27,126,194,.28)}
+  .btn-o{border:1px solid var(--line);color:var(--muted)}
+  .btn-o:hover{color:var(--primary);border-color:var(--primary)}
+  .btn-sm{padding:7px 13px}
+  .btn-d{background:var(--bad-bg);color:var(--bad)}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:20px}
+  .stat{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:22px 24px;display:flex;align-items:center;gap:16px}
+  .stat .v{font-size:var(--fs-num);font-weight:700;line-height:1}
+  .stat .k{font-size:var(--fs-meta);color:var(--muted);margin-top:5px}
+
+  .lrow{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .lrow:last-child{border:none;padding-bottom:0}
+  .lrow:first-child{padding-top:0}
+  .lrow .nm{font-weight:600}
+  .lrow .mt{font-size:var(--fs-meta);color:var(--muted);margin-top:1px}
+  .time{font-weight:600;color:var(--primary);white-space:nowrap}
+
+  .tbl{width:100%;border-collapse:collapse}
+  .tbl th{text-align:left;font-size:var(--fs-meta);font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:0 12px 14px}
+  .tbl td{padding:15px 12px;border-top:1px solid var(--line);color:var(--muted);font-size:var(--fs-body)}
+  .tbl td.nm{color:var(--ink);font-weight:600}
+  .tbl tr[data-goto]{cursor:pointer}
+  .tbl tr[data-goto]:hover td{background:var(--soft)}
+
+  .tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap}
+  .tabs button{padding:0 1px 14px;font-weight:600;color:var(--muted);position:relative}
+  .tabs button.active{color:var(--ink)}
+  .tabs button.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--primary)}
+
+  .clscard{border-radius:var(--r-sm);padding:18px 20px;cursor:pointer;transition:.15s;border:1px solid var(--line)}
+  .clscard:hover{box-shadow:0 6px 18px rgba(20,40,92,.08);border-color:transparent;transform:translateY(-2px)}
+  .clscard .cc-top{display:flex;align-items:center;gap:13px}
+  .clscard .cc-h{flex:1;min-width:0}
+  .clscard .cc-nm{font-weight:600}
+  .clscard .cc-badge{display:inline-block;font-size:9.5px;font-weight:700;color:var(--chip-sky-i);background:var(--chip-sky);border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle;letter-spacing:.3px}
+  .clscard .cc-sub{font-size:var(--fs-meta);color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .clscard .cc-arr{color:var(--primary);display:flex;flex:none}
+  .clscard .cc-arr svg{width:16px;height:16px}
+  .clscard .cc-att{margin-top:16px}
+  .clscard .cc-att-h{display:flex;justify-content:space-between;font-size:var(--fs-meta);color:var(--muted);margin-bottom:6px}
+  .clscard .cc-bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+  .clscard .cc-bar i{display:block;height:100%;border-radius:99px}
+  .clscard .cc-foot{display:flex;gap:20px;margin-top:15px;padding-top:14px;border-top:1px solid var(--line);font-size:var(--fs-meta);color:var(--muted)}
+  .clscard .cc-foot span{display:inline-flex;align-items:center;gap:6px}
+  .clscard .cc-foot svg{width:14px;height:14px}
+  .clscard .cc-foot b{color:var(--ink);font-weight:700}
+
+  .seg{display:inline-flex;background:var(--soft);border-radius:11px;padding:3px}
+  .seg button{padding:7px 15px;border-radius:8px;font-weight:600;color:var(--muted)}
+  .seg button.active{background:var(--card);color:var(--primary);box-shadow:var(--shadow)}
+
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:var(--fs-meta);color:var(--muted);margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--soft);color:var(--ink);font-size:var(--fs-body)}
+  .field textarea{resize:vertical;min-height:84px;line-height:1.55}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);background:var(--card)}
+  .rowf{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+  .profhead{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .ph-id{display:flex;align-items:center;gap:18px}
+  .ph-ava{position:relative;display:inline-grid}
+  .ph-dot{position:absolute;bottom:3px;right:3px;width:14px;height:14px;border-radius:50%;background:var(--ok);border:2.5px solid var(--card)}
+  .prog-badge{background:var(--chip-sky);border-radius:14px;padding:15px 22px;min-width:200px}
+  .prog-badge .pb-t{font-weight:700;color:var(--ink)}
+  .prog-badge .pb-s{font-size:var(--fs-meta);color:var(--muted);margin-top:3px}
+  .seccard{border:1px solid var(--line);border-radius:var(--r-sm);padding:18px 20px;background:var(--soft)}
+  .sec-h{font-weight:600;margin-bottom:15px}
+  .pkv{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px 18px}
+  .pkv .k{font-size:var(--fs-meta);color:var(--muted)}
+  .pkv .v{font-weight:600;margin-top:4px;overflow-wrap:anywhere}
+  .kv{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .kv .k{font-size:var(--fs-meta);color:var(--muted)}
+  .kv .v{font-weight:600;margin-top:3px}
+
+  .ava{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--soft);color:var(--muted);font-weight:600}
+  .ava.lg{width:52px;height:52px;font-size:15px}
+
+  .search{position:relative}
+  .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
+  .search input{width:100%;padding:11px 13px 11px 38px;border:1px solid var(--line);border-radius:11px;background:var(--soft);color:var(--ink);font-size:var(--fs-body)}
+  .search input:focus{outline:none;border-color:var(--primary);background:var(--card)}
+
+  .acc{border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:12px}
+  .acc:last-child{margin:0}
+  .acc-h{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer}
+  .acc-h .t{font-weight:600}
+  .acc-h .cnt{margin-left:auto;font-size:var(--fs-meta);color:var(--muted);margin-right:12px}
+  .acc-h svg.cv{width:18px;height:18px;color:var(--faint);transition:.2s;flex:none}
+  .acc.open svg.cv{transform:rotate(180deg)}
+  .acc-b{display:none;padding:2px 18px 12px}
+  .acc.open .acc-b{display:block}
+
+  .qrow{display:flex;align-items:center;gap:16px;padding:16px 4px;border-bottom:1px solid var(--line)}
+  .qrow:last-child{border:none}
+  .qrow .qt{flex:1;font-weight:500;min-width:0}
+  .qrow .qn{color:var(--muted);font-weight:700;width:22px;flex:none}
+
+  .cal{width:100%;border-collapse:collapse;table-layout:fixed;min-width:720px}
+  .cal th{font-size:var(--fs-meta);color:var(--muted);font-weight:600;padding:10px 8px;text-align:left}
+  .cal td{height:92px;vertical-align:top;border:1px solid var(--line);padding:7px;font-size:var(--fs-meta)}
+  .cal td .dn{color:var(--faint);font-weight:600}
+  .cal td.today{background:var(--chip-sky)}
+  .cal td.today .dn{color:var(--primary)}
+  .cal td.out{opacity:.35}
+  .cal .cev{font-size:9.5px;font-weight:600;border-radius:5px;padding:3px 6px;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--chip-green);color:var(--chip-green-i)}
+
+  .evc{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;transition:.15s}
+  .evc:hover{box-shadow:var(--shadow)}
+  .evc .img{height:96px;background-size:cover;display:grid;place-items:center;color:#fff;font-weight:700;font-size:26px}
+  .evc .body{padding:16px 18px}
+  .evc .dt{font-size:var(--fs-meta);color:var(--primary);font-weight:600}
+  .evc .nm{font-weight:600;margin-top:4px}
+  .evc .ds{font-size:var(--fs-meta);color:var(--muted);margin-top:6px;line-height:1.5}
+
+  .warnbox{background:var(--warn-bg);border-radius:var(--r);padding:16px 20px;display:flex;gap:14px;align-items:flex-start;margin-bottom:20px}
+  .warnbox svg{width:22px;height:22px;color:var(--warn);flex:none;margin-top:1px}
+  .warnbox .wt{font-weight:700;color:var(--warn)}
+  .warnbox .wm{color:var(--warn);opacity:.92;margin-top:3px;font-size:var(--fs-meta);line-height:1.55}
+  .warnbox .wm b{opacity:1}
+  .infobox{background:var(--chip-sky);border-radius:var(--r);padding:14px 18px;display:flex;gap:13px;align-items:flex-start;margin-bottom:20px}
+  .infobox svg{width:19px;height:19px;color:var(--chip-sky-i);flex:none;margin-top:1px}
+  .infobox .im{color:var(--chip-sky-i);font-size:var(--fs-meta);line-height:1.55}
+
+  .ck{width:20px;height:20px;border-radius:6px;border:2px solid var(--faint);flex:none;display:grid;place-items:center;cursor:pointer}
+  .ck.on{background:var(--primary);border-color:var(--primary)}
+  .ck svg{width:12px;height:12px;color:#fff;opacity:0}
+  .ck.on svg{opacity:1}
+
+  .star{display:inline-flex;gap:3px;cursor:pointer}
+  .star svg{width:16px;height:16px;color:var(--faint)}
+  .star svg.on{color:var(--warn);fill:var(--warn)}
+
+  .donut{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;position:relative;flex:none}
+  .donut::before{content:"";width:78px;height:78px;border-radius:50%;background:var(--card);position:absolute}
+  .donut .dv{position:relative;text-align:center}
+  .donut .dv b{font-size:19px;font-weight:700;display:block;line-height:1}
+  .donut .dv small{font-size:9.5px;color:var(--muted)}
+
+  .modal{position:fixed;inset:0;background:rgba(20,40,92,.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+  .modal.show{display:flex}
+  .mbox{background:var(--card);border-radius:var(--r);box-shadow:0 20px 55px rgba(0,0,0,.28);max-width:480px;width:100%;padding:26px 28px;animation:pop .18s ease;max-height:90vh;overflow:auto}
+  .mbox.wide{max-width:600px}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+  .micon{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;margin-bottom:16px}
+  .micon svg{width:22px;height:22px}
+  .mtitle{font-size:var(--fs-sec);font-weight:700}
+  .mmsg{color:var(--muted);margin-top:9px;line-height:1.6}
+  .mmsg b{color:var(--ink)}
+  .mbtns{display:flex;justify-content:flex-end;gap:12px;margin-top:24px}
+
+  .view{display:none}
+  .view.active{display:block;animation:f .2s ease}
+  @keyframes f{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  .scroll-x{overflow-x:auto}
+
+  .cc-group{margin-bottom:22px}
+  .cc-group:last-child{margin-bottom:0}
+  .cc-group-h{display:flex;align-items:center;gap:9px;font-size:var(--fs-meta);font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding-bottom:10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+  .cc-group-h span{background:var(--chip-sky);color:var(--chip-sky-i);border-radius:999px;padding:1px 8px;font-size:10px;letter-spacing:0}
+
+  @media (max-width:1000px){
+    .app{grid-template-columns:1fr}
+    .sidebar{position:static;height:auto;flex-direction:row;flex-wrap:wrap;padding:14px}
+    .profile{flex-direction:row;padding:0;gap:10px}.avatar{width:40px;height:40px;margin:0}
+    .nav{flex-direction:row;flex-wrap:wrap}.nav a span{display:none}.logout{margin:0}
+    .nav .parent{display:none}.nav .sub{display:flex!important;flex-direction:row;flex-wrap:wrap;margin:0}.nav .sub a{padding-left:14px}
+    .g2,.g2e,.g3,.g4,.stats,.kv,.rowf{grid-template-columns:1fr}
+  }
+</style>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="profile">
+      <div class="avatar" data-goto="profile" title="My profile" style="cursor:pointer"><img alt="" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23C4D8EE'/><circle cx='50' cy='38' r='19' fill='%23375073'/><path d='M16 98c3-23 20-33 34-33s31 10 34 33z' fill='%232B3A55'/></svg>"></div>
+      <div><div class="nm">Mateen Shaikh</div><div class="id">Welder Faculty · ID 6788</div></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div><h2 id="pg-title">Dashboard</h2><div class="crumb" id="pg-crumb"></div></div>
+      <div class="top-actions">
+        <div class="brand"><span class="lt">L&amp;T CTT</span><span class="sub">SKILLING LMS</span></div>
+      </div>
+    </div>
+    <div id="views"></div>
+  </main>
+</div>
+<div id="modal" class="modal"></div>
+
+<script>
+const ICONS={
+  grid:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  users:'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 12a3 3 0 1 0 0-6M18 20c0-2.5-1-4.3-2.5-5.3',
+  book:'M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM8 3v14',
+  doc:'M6 3h9l3 3v15H6zM15 3v4h3M9 13h6M9 17h5',
+  bank:'M6 3h9l3 3v15H6zM15 3v4h3M9 12h6M9 16h4M9 8h3',
+  clip:'M9 4h6v3H9zM7 5H5v16h14V5h-2M9 12h6M9 16h6',
+  check:'M4 7h13M4 12h13M4 17h9M18 15l2 2 3-3',
+  chat:'M4 5h16v10H9l-4 4V5z',
+  cal:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+  calchk:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M9 15l2 2 4-4',
+  handshake:'M8 11 3 6l3-2 4 3h4l4-3 3 2-5 5M8 11l3 3 2-2 2 2 3-3M8 11l2 2',
+  home:'M3 11.5 12 4l9 7.5M5 10v9h5v-6h4v6h5v-9',
+  help:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.9.4-1 .8-1 1.7M12 17h.01',
+  user:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20c0-4 3.5-6 8-6s8 2 8 6',
+  logout:'M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M9 12h11M16 8l4 4-4 4',
+  gear:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 13a7.5 7.5 0 0 0 0-2l2-1.5-2-3.4-2.4 1a7.5 7.5 0 0 0-1.7-1L14.9 3H9.1l-.4 2.6a7.5 7.5 0 0 0-1.7 1l-2.4-1-2 3.4L2.6 11a7.5 7.5 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7.5 7.5 0 0 0 1.7 1l.4 2.6h5.8l.4-2.6a7.5 7.5 0 0 0 1.7-1l2.4 1 2-3.4z',
+  arr:'M5 12h14M13 6l6 6-6 6',
+  arrl:'M19 12H5M11 6l-6 6 6 6',
+  cv:'M6 9l6 6 6-6',
+  plus:'M12 5v14M5 12h14',
+  edit:'M4 20h4L18 10l-4-4L4 16zM14 6l4 4',
+  filter:'M3 5h18l-7 8v6l-4-2v-4z',
+  search:'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4-4',
+  clock:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7.5V12l3 1.8',
+  play:'M8 5v14l11-7z',
+  pdf:'M6 3h9l3 3v15H6zM15 3v4h3M8 13h2a1.5 1.5 0 0 1 0 3H8zM8 13v6',
+  video:'M4 6h11v12H4zM15 10l5-3v10l-5-3',
+  link:'M9 15l6-6M8 12l-2 2a3 3 0 0 0 4 4l2-2M16 12l2-2a3 3 0 0 0-4-4l-2 2',
+  sheet:'M5 3h14v18H5zM5 9h14M5 15h14M11 3v18',
+  slides:'M4 4h16v12H4zM12 16v4M8 20h8',
+  award:'M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM8.5 13 7 21l5-2 5 2-1.5-8',
+  star:'M12 3l2.9 6 6.6.6-5 4.3 1.5 6.5L12 17.7 6 20.4l1.5-6.5-5-4.3 6.6-.6z',
+  flag:'M5 21V4M5 4c3-2 6 2 9 0s5 0 5 0v9s-2 2-5 0-6-2-9 0',
+  alert:'M10.3 3.9 2.7 17.2a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01',
+  info:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 7.5h.01',
+  x:'M6 6l12 12M18 6L6 18',
+  tick:'M5 12l5 5 9-11',
+  chip2:'M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3M5 5h14v14H5zM9 9h6v6H9z',
+  tool:'M15 7a4 4 0 0 1-5.2 3.8L5 15.5 8.5 19l4.7-4.8A4 4 0 0 0 17 9l-2 2-2-2z',
+  wifi:'M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8 15.5a5 5 0 0 1 8 0M12 19h.01',
+  moon:'M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z',
+  sun:'M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v3M12 20v3M4 12H1M23 12h-3M5 5 3 3M21 21l-2-2M5 19l-2 2M21 3l-2 2',
+  bell:'M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6M10 20a2 2 0 0 0 4 0',
+  loc:'M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5'
+};
+function ic(n,c){return '<svg class="'+(c||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="'+(ICONS[n]||'')+'"/></svg>';}
+function chip(c,i){return '<span class="chip '+c+'">'+ic(i)+'</span>';}
+function donut(pct,label,col){col=col||'var(--primary)';return '<div class="donut" style="background:conic-gradient('+col+' '+pct+'%,var(--line) 0)"><div class="dv"><b>'+pct+'%</b><small>'+label+'</small></div></div>';}
+function meter(label,val,col){col=col||'var(--primary)';return '<div style="margin-top:14px"><div style="display:flex;justify-content:space-between;font-size:var(--fs-meta);color:var(--muted);margin-bottom:6px"><span>'+label+'</span><b style="color:'+col+'">'+val+'%</b></div><div style="height:6px;border-radius:99px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:'+val+'%;background:'+col+'"></i></div></div>';}
+function initials(n){return n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();}
+
+/* ---------- DATA ---------- */
+const CLASSES=[
+  {id:'w2022',name:'2022-Welder',sec:'A',students:42,res:11,act:5,chip:'c-green',ic:'chip2',att:78},
+  {id:'w2025',name:'2025-Welder',sec:'A',students:23,res:1,act:6,chip:'c-sky',ic:'tool',att:64},
+  {id:'demo',name:'Demo Course',sec:'1',students:1,res:0,act:0,chip:'c-lav',ic:'wifi',att:0,upcoming:true}
+];
+const STUDENTS=[
+  {id:1109,nm:'Ajaybhai Patel',att:0,score:5.4,merit:2,ses:1,std:'p-bad'},
+  {id:1107,nm:'Bhavesh Nayka',att:0,score:4.8,merit:1,ses:0,std:'p-bad'},
+  {id:1100,nm:'Bhaveshbhai Bamne',att:0,score:6.0,merit:2,ses:1,std:'p-warn'},
+  {id:1111,nm:'Bhavin Halpati',att:100,score:8.7,merit:5,ses:3,std:'p-ok'},
+  {id:1108,nm:'Hardik Rathod',att:100,score:8.2,merit:4,ses:3,std:'p-ok'},
+  {id:1101,nm:'Jaybhai Nayka',att:100,score:7.9,merit:4,ses:2,std:'p-ok'},
+  {id:1094,nm:'Jeelkumar Tandel',att:100,score:8.9,merit:5,ses:3,std:'p-ok'},
+  {id:1099,nm:'Lalubhai Hadal',att:100,score:7.4,merit:3,ses:2,std:'p-ok'},
+  {id:1110,nm:'Manishbhai Nayka',att:100,score:8.1,merit:4,ses:3,std:'p-ok'},
+  {id:1106,nm:'Mayank Rathod',att:100,score:7.6,merit:3,ses:2,std:'p-ok'},
+  {id:1103,nm:'Nileshbhai Tandel',att:64,score:6.6,merit:2,ses:1,std:'p-warn'},
+  {id:1097,nm:'Rakeshbhai Patel',att:42,score:5.9,merit:1,ses:1,std:'p-warn'}
+];
+const QUESTIONS=[
+  {n:1,q:'Which PPE is mandatory before striking an arc?',type:'Multiple choice',marks:5},
+  {n:2,q:'A fillet weld joins two surfaces meeting at right angles.',type:'True / False',marks:2},
+  {n:3,q:'What most commonly causes porosity in a weld?',type:'Multiple choice',marks:5},
+  {n:4,q:'MIG/MAG welding uses a consumable wire electrode fed automatically.',type:'True / False',marks:2},
+  {n:5,q:'Which shielding gas is typically used for TIG welding of aluminium?',type:'Multiple choice',marks:5},
+  {n:6,q:'What is the correct electrode angle for a flat butt weld?',type:'Multiple choice',marks:5},
+  {n:7,q:'Undercutting is caused by excessive current or fast travel speed.',type:'True / False',marks:2},
+  {n:8,q:'Which weld symbol denotes a fillet weld on a drawing?',type:'Multiple choice',marks:5},
+  {n:9,q:'What should the work area be before you begin welding?',type:'Multiple choice',marks:5},
+  {n:10,q:'Spatter can be reduced by using the correct voltage setting.',type:'True / False',marks:2}
+];
+const TESTS=[
+  {nm:'Safety & PPE MCQ',batch:'2022-Welder',qs:10,marks:40,status:'Published',win:'26 Jul – 28 Jul',attempts:'38 / 42'},
+  {nm:'Weld Symbols Quiz',batch:'2022-Welder',qs:12,marks:48,status:'Published',win:'12 Jul – 14 Jul',attempts:'40 / 42'},
+  {nm:'Arc Welding Fundamentals',batch:'2025-Welder',qs:15,marks:60,status:'Draft',win:'—',attempts:'0 / 23'},
+  {nm:'Inspection & QC',batch:'2022-Welder',qs:8,marks:32,status:'Draft',win:'—',attempts:'0 / 42'}
+];
+const MODULES=['Safety & Basics','Weld Symbols','Arc Welding','Inspection & QC'];
+const CONTENT={
+  w2022:[
+    {type:'PDF',title:'Welding Safety Handbook',url:'safety-handbook.pdf',pub:true,mod:'Safety & Basics'},
+    {type:'Link',title:'AWS Weld Symbols Reference',url:'https://www.aws.org/symbols',pub:true,mod:'Weld Symbols'},
+    {type:'YouTube',title:'MIG Welding Basics',url:'https://youtu.be/1a2b3c4d',pub:true,mod:'Arc Welding'},
+    {type:'PDF',title:'Arc Welding Notes',url:'arc-welding-notes.pdf',pub:false,mod:'Arc Welding'}
+  ],
+  w2025:[
+    {type:'YouTube',title:'Intro to the Welder Trade',url:'https://youtu.be/9x8y7z0',pub:true,mod:'Safety & Basics'},
+    {type:'Link',title:'Course syllabus (Google Doc)',url:'https://docs.google.com/welder-2025',pub:true,mod:'Safety & Basics'}
+  ],
+  demo:[]
+};
+const MENTEES=[
+  {id:1094,nm:'Jeelkumar Tandel',batch:'2022-Welder',last:'18 Jul 2026',ses:3,miss:0,std:'p-ok',stt:'On track'},
+  {id:1111,nm:'Bhavin Halpati',batch:'2022-Welder',last:'15 Jul 2026',ses:3,miss:0,std:'p-ok',stt:'On track'},
+  {id:1109,nm:'Ajaybhai Patel',batch:'2022-Welder',last:'02 Jun 2026',ses:1,miss:2,std:'p-bad',stt:'2 missed'},
+  {id:1097,nm:'Rakeshbhai Patel',batch:'2022-Welder',last:'20 Jun 2026',ses:1,miss:1,std:'p-warn',stt:'1 missed'},
+  {id:1108,nm:'Hardik Rathod',batch:'2022-Welder',last:'16 Jul 2026',ses:3,miss:0,std:'p-ok',stt:'On track'}
+];
+const SESLOG=[
+  ['18 Jul 2026','Jeelkumar Tandel','Reviewed weld symbol reading; discussed workshop confidence','Present'],
+  ['16 Jul 2026','Hardik Rathod','Career guidance — ITI to apprenticeship pathway','Present'],
+  ['15 Jul 2026','Bhavin Halpati','Follow-up on practical assessment prep','Present'],
+  ['02 Jun 2026','Ajaybhai Patel','Attendance concern — personal circumstances noted','Present']
+];
+const MSESSIONS=[
+  {student:'Jeelkumar Tandel',date:'02 Aug 2026',time:'10:00 AM',topic:'Weld symbol reading follow-up',status:'Accepted'},
+  {student:'Ajaybhai Patel',date:'03 Aug 2026',time:'02:00 PM',topic:'Attendance & workshop confidence',status:'Pending'},
+  {student:'Hardik Rathod',date:'05 Aug 2026',time:'11:00 AM',topic:'Apprenticeship pathway',status:'Pending'}
+];
+const MHISTORY=[
+  {student:'Jeelkumar Tandel',date:'18 Jul 2026',topic:'Weld symbols; workshop confidence'},
+  {student:'Hardik Rathod',date:'16 Jul 2026',topic:'Career guidance — ITI to apprenticeship'},
+  {student:'Bhavin Halpati',date:'15 Jul 2026',topic:'Practical assessment prep'}
+];
+const TOPICS=[
+  {t:'Common causes of weld defects — share what you have seen',batch:'2022-Welder',posts:14,scored:9,by:'You'},
+  {t:'Best safety practice you follow every day',batch:'2022-Welder',posts:9,scored:9,by:'You'},
+  {t:'MIG vs TIG — when would you pick each?',batch:'2025-Welder',posts:6,scored:0,by:'You'}
+];
+const POSTS=[
+  {nm:'Jeelkumar Tandel',mt:'Lack of shielding gas coverage causes porosity — I keep the nozzle close and check the flow meter before every run.',stars:5},
+  {nm:'Bhavin Halpati',mt:'Dirty or rusty base metal is the biggest one in our shop. We grind and wipe the joint first.',stars:4},
+  {nm:'Hardik Rathod',mt:'Too much travel speed gives undercut. Slowing down fixed it for me.',stars:4},
+  {nm:'Lalubhai Hadal',mt:'Moisture on electrodes. We store them in the oven now.',stars:3},
+  {nm:'Ajaybhai Patel',mt:'defects happen',stars:1}
+];
+const EVENTS=[
+  ['Aug','15','Independence Day Celebration','Flag hoisting and cultural programme at the CTT campus.','c-amber'],
+  ['Aug','18','Ganesh Chaturthi','Pooja and lunch for all trainees and faculty.','c-green'],
+  ['Sep','05','Teachers Day','Felicitation of CTT faculty and mentors.','c-sky'],
+  ['Oct','21','Industry Exposure Visit','Welder & Fitter batches — L&T fabrication yard tour.','c-lav'],
+  ['Dec','21','Christmas Party','Carols, games and a shared meal to close the term.','c-sky'],
+  ['May','01','Labour Day','Workshop closed — skilled-worker recognition day.','c-green']
+];
+const TODAY=[
+  ['09:00 – 10:00','Welder — Lecture','2022-Welder · Section A · Room 4','var(--chip-green-i)'],
+  ['11:00 – 12:30','Welder — Practical','Workshop 2 · 2022-Welder','var(--chip-green-i)'],
+  ['14:00 – 15:00','Welder — Theory','2025-Welder · Room 2','var(--chip-sky-i)']
+];
+const CASES=[
+  {id:'4821',subj:'Question bank not saving marks',cat:'Assessment / grading',pri:'High',status:'Open',age:'2 days ago',opened:'26 Jul 2026',desc:'When I set marks on a question in the bank and save, the value resets to 0 after reload. It happens on the 2022-Welder class for multiple-choice questions.',log:[['26 Jul 2026','You','Case raised'],['26 Jul 2026','Support desk','Acknowledged — investigating with the platform team']]},
+  {id:'4790',subj:'Add Gujarati content pack',cat:'Academic / content',pri:'Normal',status:'In progress',age:'1 week ago',opened:'21 Jul 2026',desc:'Request to enable Gujarati-language resources for the Welder module so trainees can read handouts in their own language.',log:[['21 Jul 2026','You','Case raised'],['22 Jul 2026','Content team','Translation in progress — ETA next week']]},
+  {id:'4762',subj:'Timetable sync issue',cat:'Account / login',pri:'Normal',status:'Resolved',age:'2 weeks ago',opened:'14 Jul 2026',desc:"Timetable was showing last term's slots. Needed a refresh of the published academic calendar.",log:[['14 Jul 2026','You','Case raised'],['15 Jul 2026','Support desk','Republished calendar — resolved']]}
+];
+
+/* ---------- HELPERS ---------- */
+function clsCard(c){
+  const ac=c.att>=75?'var(--ok)':c.att>=50?'var(--warn)':'var(--bad)';
+  const attRow=c.upcoming
+    ? '<div class="cc-att"><div class="cc-att-h"><span>Attendance</span><b class="muted">Not started</b></div><div class="cc-bar"><i style="width:0%"></i></div></div>'
+    : '<div class="cc-att"><div class="cc-att-h"><span>Attendance</span><b style="color:'+ac+'">'+c.att+'%</b></div><div class="cc-bar"><i style="width:'+c.att+'%;background:'+ac+'"></i></div></div>';
+  return '<div class="clscard" data-open-class="'+c.id+'">'+
+    '<div class="cc-top">'+chip(c.chip,c.ic)+
+      '<div class="cc-h"><div class="cc-nm">'+c.name+(c.upcoming?'<span class="cc-badge">Upcoming</span>':'')+'</div><div class="cc-sub">Section '+(c.sec||'—')+' · '+c.students+' student'+(c.students===1?'':'s')+'</div></div>'+
+      '<span class="cc-arr">'+ic('arr')+'</span></div>'+
+    attRow+
+    '<div class="cc-foot"><span>'+ic('pdf')+'<b>'+c.res+'</b> resources</span><span>'+ic('edit')+'<b>'+c.act+'</b> activities</span></div>'+
+  '</div>';
+}
+function lrow(nm,mt,right){return '<div class="lrow"><div style="flex:1"><div class="nm">'+nm+'</div><div class="mt">'+mt+'</div></div>'+right+'</div>';}
+function tclass(time,name,loc,col){return '<div style="display:flex;align-items:center;gap:16px;padding:14px 16px;background:var(--soft);border-left:3px solid '+col+';border-radius:10px;margin-bottom:10px"><div class="time" style="width:120px">'+time+'</div><div style="flex:1;min-width:0"><div style="font-weight:600">'+name+'</div><div class="muted" style="font-size:var(--fs-meta);margin-top:2px">'+loc+'</div></div></div>';}
+function stars(n){var s='';for(var i=1;i<=5;i++){s+='<svg class="'+(i<=n?'on':'')+'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="'+ICONS.star+'"/></svg>';}return '<span class="star" data-stars>'+s+'</span>';}
+function acc(open,head,body){return '<div class="acc'+(open?' open':'')+'"><div class="acc-h">'+head+ic('cv','cv')+'</div><div class="acc-b">'+body+'</div></div>';}
+function resRow(i,col,nm,tot,pub){return '<div class="acc"><div class="acc-h">'+chip(col,i)+'<span class="t">'+nm+'</span><span class="cnt">Total '+tot+' · Published '+pub+'</span>'+ic('cv','cv')+'</div><div class="acc-b"><div class="muted" style="padding:6px 0">No items yet in this batch. Use <b>+ Resource</b> to add '+nm.toLowerCase()+'.</div></div></div>';}
+
+let CURCLASS='w2022';
+
+/* ---------- VIEWS ---------- */
+const V={};
+
+V.home=()=>`
+<div class="stats">
+  <div class="stat">${chip('c-sky','users')}<div><div class="v">3</div><div class="k">My classes</div></div></div>
+  <div class="stat">${chip('c-green','user')}<div><div class="v">66</div><div class="k">Total students</div></div></div>
+  <div class="stat">${chip('c-lav','calchk')}<div><div class="v">1030</div><div class="k">Sessions · 5 conducted</div></div></div>
+  <div class="stat">${chip('c-amber','clip')}<div><div class="v">4</div><div class="k">Pending grading</div></div></div>
+</div>
+<div class="card" style="margin-bottom:20px">
+  <div class="head"><h3>My classes</h3><a class="link" data-goto="students">My students ${ic('arr')}</a></div>
+  <div class="grid g3">${CLASSES.map(clsCard).join('')}</div>
+</div>
+<div class="grid g2e">
+  <div class="card">
+    <div class="head"><h3>Today's timetable</h3><a class="link" data-goto="timetable">Full ${ic('arr')}</a></div>
+    ${TODAY.map(r=>lrow(r[1],r[2],'<div class="time">'+r[0].split(' – ')[0]+'</div>')).join('')}
+  </div>
+  <div class="card">
+    <div class="head"><h3>Needs your attention</h3><a class="link" data-goto="assess">Assessments ${ic('arr')}</a></div>
+    ${lrow('Grade — Safety & PPE MCQ','2022-Welder · 38 attempts to review',pill('p-warn','Pending'))}
+    ${lrow('Score forum merit','2025-Welder · MIG vs TIG topic · 6 posts',pill('p-warn','Pending'))}
+    ${lrow('Weld Symbols Quiz','2022-Welder · results consolidated',pill('p-ok','Done'))}
+    ${lrow('Publish — Arc Welding test','2025-Welder · still in draft',pill('p-neu','Draft'))}
+  </div>
+</div>`;
+
+V.students=()=>{
+  const c=CLASSES.find(x=>x.id===CURCLASS)||CLASSES[0];
+  return `
+<div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+  <div style="font-weight:600">Your class</div>
+  <div class="seg" data-classseg>${CLASSES.map(x=>`<button data-class="${x.id}" class="${x.id===CURCLASS?'active':''}">${x.name}</button>`).join('')}</div>
+  <div class="muted" style="font-size:var(--fs-meta);margin-left:auto">Section ${c.sec} · ${c.name==='Demo Course'?'1':STUDENTS.length} students</div>
+</div>
+<div class="card">
+  <div class="head"><h3>My students</h3><div class="search" style="width:230px">${ic('search')}<input placeholder="${STUDENTS.length} records..." data-search></div></div>
+  <div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Name</th><th>Registration ID</th><th>Email</th><th>Attendance</th><th>Avg score</th><th>Standing</th></tr></thead><tbody>
+  ${STUDENTS.map(s=>{const em=s.nm.toLowerCase().replace(/ /g,'.').replace(/[^a-z.]/g,'')+'.'+s.id+'@ltpct.local';const ac=s.att>=75?'var(--ok)':s.att>=50?'var(--warn)':'var(--bad)';
+    return `<tr data-goto="student" data-sid="${s.id}" data-back="students"><td class="nm"><div style="display:flex;align-items:center;gap:12px"><span class="ava">${initials(s.nm)}</span>${s.nm}</div></td><td>${s.id}</td><td>${em}</td><td><b style="color:${ac}">${s.att}%</b></td><td>${s.score.toFixed(1)}</td><td>${pill(s.std,s.std==='p-ok'?'On track':s.std==='p-warn'?'Watch':'At risk')}</td></tr>`;}).join('')}
+  </tbody></table></div>
+</div>`;};
+
+V.student=()=>{
+  const s=STUDENTS.find(x=>x.id===SELSTU)||STUDENTS[0];
+  const em=s.nm.toLowerCase().replace(/ /g,'.').replace(/[^a-z.]/g,'')+'.'+s.id+'@ltpct.local';
+  const ac=s.att>=75?'var(--ok)':s.att>=50?'var(--warn)':'var(--bad)';
+  const scoreRows=[['Safety & PPE MCQ','Multiple choice','36 / 40','p-ok','Passed'],['Weld Symbols Quiz','Multiple choice','40 / 48','p-ok','Passed'],['Arc Welding Fundamentals','Multiple choice','—','p-neu','Not attempted']];
+  return `
+<a class="link" data-goto="${BACKTO==='course'?'course':'students'}" style="margin-bottom:16px">${ic('arrl')} Back to ${BACKTO==='course'?'course':'my students'}</a>
+<div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+  <span class="ava lg">${initials(s.nm)}</span>
+  <div style="flex:1;min-width:180px"><h2 style="font-size:var(--fs-pg);font-weight:700">${s.nm}</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">ID ${s.id} · 2022-Welder · Section A · ${em}</div></div>
+  <div class="muted" style="font-size:var(--fs-meta);text-align:right">Mentor<br><b style="color:var(--ink);font-size:var(--fs-body)">You (Mateen Shaikh)</b></div>
+</div>
+<div class="infobox">${ic('info')}<div class="im"><b>Consolidated learner record.</b> This joins MCQ results, mentoring history and discussion-forum merit into one profile — scores are never shown in isolation (FRD FR-4.5).</div></div>
+<div class="stats">
+  <div class="stat"><span class="chip" style="background:${s.att>=75?'var(--ok-bg)':'var(--warn-bg)'};color:${ac}">${ic('check')}</span><div><div class="v">${s.att}%</div><div class="k">Attendance</div></div></div>
+  <div class="stat">${chip('c-lav','award')}<div><div class="v">${s.score.toFixed(1)}</div><div class="k">Avg assessment</div></div></div>
+  <div class="stat">${chip('c-sky','handshake')}<div><div class="v">${s.ses}</div><div class="k">Mentoring sessions</div></div></div>
+  <div class="stat">${chip('c-amber','star')}<div><div class="v">${s.merit}<span style="font-size:14px;color:var(--muted)">/5</span></div><div class="k">Forum merit</div></div></div>
+</div>
+<div class="card">
+  <div class="tabs" data-tabs="stu"><button class="active" data-p="asmt">Assessments</button><button data-p="ment">Mentoring</button><button data-p="frm">Forum merit</button></div>
+  <div data-body="asmt"><table class="tbl"><thead><tr><th>Assessment</th><th>Type</th><th>Score</th><th>Result</th></tr></thead><tbody>
+    ${scoreRows.map(r=>`<tr><td class="nm">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${pill(r[3],r[4])}</td></tr>`).join('')}
+  </tbody></table></div>
+  <div data-body="ment" style="display:none">
+    ${s.ses>0?SESLOG.filter(x=>x[1]===s.nm).concat(s.ses>1?[['12 May 2026',s.nm,'Introductory mentoring session and goal setting','Present']]:[]).map(x=>lrow(x[0],x[2],pill('p-ok',x[3]))).join('')||lrow('No sessions in current view','Earlier sessions accumulate in the longitudinal profile',pill('p-neu','—')):'<div class="muted" style="padding:8px 0">No mentoring sessions logged yet. Use Mentoring → Log session.</div>'}
+  </div>
+  <div data-body="frm" style="display:none">
+    ${lrow('Common causes of weld defects','Scored contribution',stars(s.merit))}
+    ${lrow('Best safety practice you follow','Scored contribution',stars(Math.max(1,s.merit-1)))}
+  </div>
+</div>`;};
+
+/* ---------- COURSE (tabbed) ---------- */
+function ctIcon(t){return {PDF:['pdf','c-amber'],YouTube:['video','c-lav'],Link:['link','c-sky']}[t]||['doc','c-sky'];}
+function contentRow(it,i){const [icn,cc]=ctIcon(it.type);
+  return '<div class="lrow"><span class="chip '+cc+'" style="width:38px;height:38px;border-radius:10px">'+ic(icn)+'</span>'+
+    '<div style="flex:1;min-width:0"><div class="nm">'+it.title+'</div><div class="mt" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+it.type+' · '+it.url+'</div></div>'+
+    pill(it.pub?'p-ok':'p-neu',it.pub?'Published':'Draft')+
+    '<button class="btn btn-o btn-sm" data-edit-content="'+i+'" style="margin-left:10px">'+ic('edit')+'</button></div>';
+}
+function renderContentItems(items){
+  if(!items.length)return '<div class="muted" style="padding:20px 0;text-align:center">No content yet — use <b>Add content</b> to upload a PDF, embed a YouTube video, or add a link.</div>';
+  const groups={};
+  items.forEach((it,i)=>{const k=it.mod||'General';(groups[k]||(groups[k]=[])).push({it,i});});
+  const order=[...MODULES.filter(m=>groups[m]),...Object.keys(groups).filter(k=>!MODULES.includes(k))];
+  return order.map(mod=>'<div class="cc-group"><div class="cc-group-h">'+mod+'<span>'+groups[mod].length+'</span></div>'+
+    groups[mod].map(({it,i})=>contentRow(it,i)).join('')+'</div>').join('');
+}
+function renderCourseContent(){const el=document.getElementById('cc-list');if(el)el.innerHTML=renderContentItems(CONTENT[CURCLASS]||[]);}
+function courseStudents(c){
+  const list=c.id==='demo'?STUDENTS.slice(0,1):STUDENTS;
+  return '<div class="head"><h3>Enrolled students</h3><div class="search" style="width:220px">'+ic('search')+'<input placeholder="'+list.length+' students..." data-search></div></div>'+
+    '<div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Name</th><th>Reg ID</th><th>Attendance</th><th>Avg score</th><th></th></tr></thead><tbody>'+
+    list.map(s=>{const ac=s.att>=75?'var(--ok)':s.att>=50?'var(--warn)':'var(--bad)';
+      return '<tr data-goto="student" data-sid="'+s.id+'" data-back="course"><td class="nm"><div style="display:flex;align-items:center;gap:12px"><span class="ava">'+initials(s.nm)+'</span>'+s.nm+'</div></td><td>'+s.id+'</td><td><b style="color:'+ac+'">'+s.att+'%</b></td><td>'+s.score.toFixed(1)+'</td><td style="text-align:right"><span class="link">'+ic('arr')+'</span></td></tr>';}).join('')+
+    '</tbody></table></div>';
+}
+function courseContent(c){
+  return '<div class="head"><h3>Course content</h3><button class="btn btn-p btn-sm" data-add-content>'+ic('plus')+' Add content</button></div>'+
+    '<div id="cc-list">'+renderContentItems(CONTENT[c.id]||[])+'</div>';
+}
+function courseAssess(c){
+  const tests=TESTS.map((t,i)=>({t,i})).filter(x=>x.t.batch===c.name);
+  const body=tests.length?'<div class="scroll-x"><table class="tbl"><thead><tr><th>Assessment</th><th>Questions</th><th>Marks</th><th>Window</th><th>Status</th><th></th></tr></thead><tbody>'+
+    tests.map(({t,i})=>'<tr><td class="nm">'+t.nm+'</td><td>'+t.qs+'</td><td>'+t.marks+'</td><td>'+t.win+'</td><td>'+pill(t.status==='Published'?'p-ok':'p-neu',t.status)+'</td>'+
+      '<td style="text-align:right;white-space:nowrap"><button class="btn btn-o btn-sm" data-subs="'+i+'">'+ic('users')+' Submissions</button> <button class="btn btn-o btn-sm" data-edittest="'+i+'" data-back="course">'+ic('edit')+' Edit</button></td></tr>').join('')+
+    '</tbody></table></div>':'<div class="muted" style="padding:20px 0;text-align:center">No assessments yet for this course.</div>';
+  return '<div class="head"><h3>Assessments</h3><button class="btn btn-p btn-sm" data-newtest data-back="course">'+ic('plus')+' Create assessment</button></div>'+body;
+}
+V.courses=()=>`
+<div class="card">
+  <div class="head"><h3>My courses</h3><span class="muted" style="font-size:var(--fs-meta)">${CLASSES.length} courses · select one to manage students, content &amp; assessments</span></div>
+  <div class="grid g3">${CLASSES.map(clsCard).join('')}</div>
+</div>`;
+
+/* ---------- RESULTS & SCORING (by course) ---------- */
+function resGrades(t){
+  const scores=[36,40,34,38,32,40,28,30];
+  return '<div class="scroll-x"><table class="tbl"><thead><tr><th>Student</th><th>Mode</th><th>Score</th><th>Result</th><th></th></tr></thead><tbody>'+
+    STUDENTS.slice(0,8).map((s,i)=>{const online=i%4!==0;const sc=online?scores[i]:null;const pass=sc>=t.marks*0.5;
+      return '<tr><td class="nm">'+s.nm+'</td><td>'+(online?pill('p-info','Online'):pill('p-neu','Not attempted'))+'</td><td>'+(online?sc+' / '+t.marks:'—')+'</td><td>'+(online?pill(pass?'p-ok':'p-bad',pass?'Passed':'Retake'):pill('p-warn','Awaiting'))+'</td><td style="text-align:right">'+(online?'':'<button class="btn btn-o btn-sm" data-add="manual" data-nm="'+s.nm+'">'+ic('edit')+' Enter score</button>')+'</td></tr>';}).join('')+
+    '</tbody></table></div>';
+}
+function resCourseCard(c){
+  const n=TESTS.filter(t=>t.batch===c.name).length;
+  return '<div class="clscard" data-res-course="'+c.id+'"><div class="cc-top">'+chip(c.chip,c.ic)+
+    '<div class="cc-h"><div class="cc-nm">'+c.name+'</div><div class="cc-sub">Section '+(c.sec||'—')+' · '+c.students+' student'+(c.students===1?'':'s')+'</div></div><span class="cc-arr">'+ic('arr')+'</span></div>'+
+    '<div class="cc-foot"><span>'+ic('clip')+'<b>'+n+'</b> assessments</span><span>'+ic('users')+'<b>'+c.students+'</b> learners</span></div></div>';
+}
+function renderResults(){
+  const el=document.getElementById('res-body');if(!el)return;
+  if(!RESCOURSE){
+    el.innerHTML='<div class="muted" style="font-size:var(--fs-meta);margin-bottom:16px">Select a course to see its assessments and grades.</div><div class="grid g3">'+CLASSES.map(resCourseCard).join('')+'</div>';
+    return;
+  }
+  const c=CLASSES.find(x=>x.id===RESCOURSE)||CLASSES[0];
+  const tests=TESTS.filter(t=>t.batch===c.name);
+  el.innerHTML='<a class="link" data-res-back style="margin-bottom:16px;display:inline-flex">'+ic('arrl')+' All courses</a>'+
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'+chip(c.chip,c.ic)+'<div><div style="font-weight:600">'+c.name+'</div><div class="muted" style="font-size:var(--fs-meta)">Section '+(c.sec||'—')+' · '+tests.length+' assessment'+(tests.length===1?'':'s')+'</div></div></div>'+
+    (tests.length?tests.map((t,idx)=>'<div class="acc'+(idx===0?' open':'')+'"><div class="acc-h">'+chip('c-lav','clip')+'<span class="t">'+t.nm+'</span><span class="cnt">'+t.marks+' marks · '+t.attempts+'</span>'+pill(t.status==='Published'?'p-ok':'p-neu',t.status)+ic('cv','cv')+'</div><div class="acc-b">'+resGrades(t)+'</div></div>').join(''):'<div class="muted" style="padding:16px 0">No assessments for this course yet.</div>');
+}
+
+V.course=()=>{
+  const c=CLASSES.find(x=>x.id===CURCLASS)||CLASSES[0];
+  const ac=c.att>=75?'var(--ok)':c.att>=50?'var(--warn)':'var(--bad)';
+  return `
+<a class="link" data-goto="courses" style="margin-bottom:16px">${ic('arrl')} Back to my courses</a>
+<div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+  ${chip(c.chip,c.ic)}
+  <div style="flex:1;min-width:180px"><h2 style="font-size:var(--fs-pg);font-weight:700">${c.name}${c.upcoming?'<span class="cc-badge">Upcoming</span>':''}</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">Section ${c.sec||'—'} · ${c.students} student${c.students===1?'':'s'} · Welder trade</div></div>
+  ${c.upcoming?pill('p-info','Upcoming'):`<div style="text-align:right"><div class="lbl">Attendance</div><div style="font-weight:700;font-size:17px;color:${ac};margin-top:3px">${c.att}%</div></div>`}
+</div>
+<div class="card">
+  <div class="tabs" data-tabs="course">
+    <button class="active" data-p="students">Students</button>
+    <button data-p="content">Course Content</button>
+    <button data-p="assess">Assessments</button>
+  </div>
+  <div data-body="students">${courseStudents(c)}</div>
+  <div data-body="content" style="display:none">${courseContent(c)}</div>
+  <div data-body="assess" style="display:none">${courseAssess(c)}</div>
+</div>`;
+};
+function openContentModal(idx){
+  CEDIT=(typeof idx==='number')?idx:-1;
+  const it=CEDIT>=0?CONTENT[CURCLASS][CEDIT]:{type:'PDF',title:'',url:'',pub:true,mod:MODULES[0]};
+  const esc=s=>(s||'').replace(/"/g,'&quot;');
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">'+(CEDIT>=0?'Edit content':'Add content')+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div>'+
+    '<div class="rowf"><div class="field"><label>Type</label><select id="ct-type">'+['PDF','YouTube','Link'].map(t=>'<option'+(t===it.type?' selected':'')+'>'+t+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Module</label><select id="ct-mod">'+MODULES.map(m=>'<option'+(m===it.mod?' selected':'')+'>'+m+'</option>').join('')+'</select></div></div>'+
+    '<div class="field"><label>Title</label><input id="ct-title" placeholder="e.g. Welding Safety Handbook" value="'+esc(it.title)+'"></div>'+
+    '<div class="field"><label>File name / URL</label><input id="ct-url" placeholder="PDF file, YouTube URL, or link" value="'+esc(it.url)+'"></div>'+
+    '<label class="lrow" style="cursor:pointer;padding:6px 0;border:none"><span class="ck '+(it.pub?'on':'')+'" data-check id="ct-pub">'+ic('tick')+'</span><span>Published (visible to learners)</span></label>'+
+    (CEDIT>=0?'<button class="btn btn-d btn-sm" data-del-content="'+CEDIT+'" style="margin-top:6px">'+ic('x')+' Delete this item</button>':'')+
+    '<div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-content-confirm>'+(CEDIT>=0?'Save':'Add content')+'</button></div></div>');
+}
+function openSubsModal(idx){
+  SUBTEST=idx;const t=TESTS[idx];const list=STUDENTS.slice(0,8);
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">Submissions · '+t.nm+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div>'+
+    '<div class="muted" style="font-size:var(--fs-meta);margin-bottom:10px">'+t.batch+' · out of '+t.marks+' · '+t.attempts+' submitted</div>'+
+    '<div style="max-height:54vh;overflow:auto"><table class="tbl"><thead><tr><th>Student</th><th>Status</th><th>Score</th><th></th></tr></thead><tbody>'+
+    list.map((s,i)=>{const online=i%4!==0;const sc=online?[36,40,34,38,32,40,28,30][i]:null;
+      return '<tr><td class="nm">'+s.nm+'</td><td>'+(online?pill('p-info','Submitted'):pill('p-neu','Not attempted'))+'</td><td>'+(online?sc+' / '+t.marks:'—')+'</td><td style="text-align:right">'+(online?'<button class="btn btn-o btn-sm" data-view-sub="'+i+'">View</button>':'')+'</td></tr>';}).join('')+
+    '</tbody></table></div><div class="mbtns"><button class="btn btn-o" data-mclose>Close</button></div></div>');
+}
+function openSubView(i){
+  const t=TESTS[SUBTEST];const s=STUDENTS.slice(0,8)[i];const qs=QUESTIONS.slice(0,Math.min(t.qs,QUESTIONS.length));
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">'+s.nm+' · '+t.nm+'</h3><button class="btn btn-o btn-sm" data-subs="'+SUBTEST+'">'+ic('arrl')+' Back</button></div>'+
+    '<div class="muted" style="font-size:var(--fs-meta);margin-bottom:12px">Submitted answer sheet</div>'+
+    '<div style="max-height:52vh;overflow:auto">'+qs.map((q,qi)=>{const correct=qi%3!==0;return '<div class="qrow" style="align-items:flex-start"><span class="qn">'+(qi+1)+'.</span><div style="flex:1"><div style="font-weight:500">'+q.q+'</div><div class="mt" style="margin-top:4px">Answer: <b>Option '+String.fromCharCode(65+(qi%3))+'</b></div></div>'+pill(correct?'p-ok':'p-bad',correct?'Correct':'Wrong')+'</div>';}).join('')+'</div>'+
+    '<div class="mbtns"><button class="btn btn-o" data-subs="'+SUBTEST+'">Back to submissions</button></div></div>');
+}
+
+V.content=()=>`
+<div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+  <div class="field" style="margin:0;min-width:200px"><label>Term / Batch</label><select><option>2022-Welder</option><option>2025-Welder</option><option>Demo Course</option></select></div>
+  <div class="field" style="margin:0;min-width:200px"><label>Course</label><select><option>Welder — Section A</option><option>Welder — Section B</option></select></div>
+</div>
+<div class="grid g2e">
+  <div class="card">
+    <div class="head"><h3>Activities</h3><button class="btn btn-p btn-sm" data-add="activity">${ic('plus')} Activity</button></div>
+    ${resRow('clip','c-amber','Assignments',3,1)}
+    ${resRow('doc','c-lav','Assessments',4,2)}
+    ${resRow('chat','c-green','Forum',3,2)}
+  </div>
+  <div class="card">
+    <div class="head"><h3>Resources</h3><button class="btn btn-p btn-sm" data-add="resource">${ic('plus')} Resource</button></div>
+    ${resRow('slides','c-sky','Presentations',4,3)}
+    ${resRow('sheet','c-green','Spreadsheet',1,1)}
+    ${resRow('pdf','c-amber','PDF handouts',6,6)}
+    ${resRow('video','c-lav','Videos',3,2)}
+    ${resRow('link','c-sky','Links',2,2)}
+  </div>
+</div>
+<div class="infobox" style="margin-top:20px">${ic('info')}<div class="im"><b>Faculty upload only.</b> Trainers add content, PDFs and video links here. Multi-language material (Gujarati / Hindi / English) is supported per the content team's setup. The learner portal itself never accepts any file upload (FRD FR-6.4).</div></div>`;
+
+V.qbank=()=>`
+<div style="display:grid;grid-template-columns:260px 1fr;gap:20px" class="qgrid">
+  <div class="card" style="align-self:start">
+    <div class="head" style="margin-bottom:16px"><h3>Filters</h3><span class="link" data-clearfilter>Clear all</span></div>
+    <div class="lbl" style="margin-bottom:10px">Class</div>
+    ${['2025-Welder-Batch-650','2025-Welder program 312','2022-Welder-8055'].map((c,i)=>`<label class="lrow" style="cursor:pointer;padding:9px 0"><span class="ck ${i===0?'on':''}" data-radio>${ic('tick')}</span><span style="flex:1">${c}</span></label>`).join('')}
+    <div class="lbl" style="margin:16px 0 10px">Question type</div>
+    ${['Multiple choice','True / False'].map(t=>`<label class="lrow" style="cursor:pointer;padding:9px 0"><span class="ck" data-check>${ic('tick')}</span><span style="flex:1">${t}</span></label>`).join('')}
+    <div class="infobox" style="margin:16px 0 0;padding:11px 13px">${ic('info')}<div class="im">Per CTT scope only objective question types are used — short/long answer and essay are out of scope.</div></div>
+  </div>
+  <div class="card">
+    <div class="head"><h3>Question bank</h3><div style="display:flex;gap:12px"><div class="search" style="width:190px">${ic('search')}<input placeholder="${QUESTIONS.length} questions..." data-search></div><button class="btn btn-p btn-sm" data-add="question">${ic('plus')} Add question</button></div></div>
+    <div data-searchtable>
+    ${QUESTIONS.map(q=>`<div class="qrow" data-row><span class="qn">${q.n}.</span><span class="qt">${q.q}</span><span class="pill p-info">${q.type}</span><b style="color:var(--primary);width:70px;text-align:right">${q.marks} Marks</b></div>`).join('')}
+    </div>
+  </div>
+</div>`;
+
+V.assess=()=>`
+<div class="card">
+  <div class="tabs" data-tabs="asx"><button class="active" data-p="tests">MCQ tests</button><button data-p="results">Results & scoring</button></div>
+  <div data-body="tests">
+    <div class="head"><h3>MCQ tests</h3><button class="btn btn-p btn-sm" data-newtest data-back="assess">${ic('plus')} Create test</button></div>
+    <div class="muted" style="font-size:var(--fs-meta);margin-bottom:6px">Select a test to view its questions, or create a new one.</div>
+    <div class="scroll-x"><table class="tbl"><thead><tr><th>Test</th><th>Batch</th><th>Questions</th><th>Marks</th><th>Window</th><th>Attempts</th><th>Status</th></tr></thead><tbody>
+    ${TESTS.map((t,i)=>`<tr data-goto="testview" data-tid="${i}" data-back="assess"><td class="nm">${t.nm}</td><td>${t.batch}</td><td>${t.qs}</td><td>${t.marks}</td><td>${t.win}</td><td>${t.attempts}</td><td>${pill(t.status==='Published'?'p-ok':'p-neu',t.status)}</td></tr>`).join('')}
+    </tbody></table></div>
+  </div>
+  <div data-body="results" style="display:none">
+    <div class="infobox" style="margin-top:0">${ic('info')}<div class="im"><b>Online + manual scoring.</b> Online attempts are auto-scored; use <b>Enter score</b> for offline attempts (FR-4.3). Results roll up per course (FR-4.4).</div></div>
+    <div id="res-body"></div>
+  </div>
+</div>`;
+
+V.testview=()=>{
+  const t=TESTS[SELTEST]||TESTS[0];
+  const qs=QUESTIONS.slice(0,Math.min(t.qs,QUESTIONS.length));
+  return `
+<a class="link" data-goto="${BACKTO==='course'?'course':'assess'}" style="margin-bottom:16px">${ic('arrl')} Back to ${BACKTO==='course'?'course':'assessments'}</a>
+<div class="card" style="margin-bottom:20px">
+  <div class="head" style="align-items:flex-start">
+    <div><h2 style="font-size:var(--fs-pg);font-weight:700">${t.nm}</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:4px">${t.batch} · ${t.qs} questions · ${t.marks} marks</div></div>
+    <div style="display:flex;gap:10px;align-items:center">${pill(t.status==='Published'?'p-ok':'p-neu',t.status)}<button class="btn btn-o btn-sm" data-edittest="${SELTEST}">${ic('edit')} Edit test</button></div>
+  </div>
+  <div style="display:flex;gap:30px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px">
+    <div><div class="lbl">Window</div><div style="font-weight:600;margin-top:5px">${t.win}</div></div>
+    <div><div class="lbl">Attempts</div><div style="font-weight:600;margin-top:5px">${t.attempts}</div></div>
+    <div><div class="lbl">Pass mark</div><div style="font-weight:600;margin-top:5px">50%</div></div>
+    <div><div class="lbl">Type</div><div style="font-weight:600;margin-top:5px">MCQ (objective)</div></div>
+  </div>
+</div>
+<div class="card">
+  <div class="head"><h3>Questions (${qs.length})</h3><button class="btn btn-o btn-sm" data-edittest="${SELTEST}">${ic('edit')} Edit questions</button></div>
+  ${qs.map((q,i)=>`<div class="qrow"><span class="qn">${i+1}.</span><span class="qt">${q.q}</span><span class="pill p-info">${q.type}</span><b style="color:var(--primary);width:64px;text-align:right">${q.marks} Marks</b></div>`).join('')}
+</div>`;};
+
+V.testnew=()=>`
+<a class="link" data-goto="${BACKTO==='course'?'course':'assess'}" style="margin-bottom:16px">${ic('arrl')} Back to ${BACKTO==='course'?'course':'assessments'}</a>
+<div class="card" style="margin-bottom:20px">
+  <div class="head"><h3 id="tb-mode">Create MCQ test</h3><div style="display:flex;gap:10px"><button class="btn btn-o btn-sm" data-save-test>Save draft</button><button class="btn btn-p btn-sm" data-publish-test>${ic('check')} Publish</button></div></div>
+  <div class="lbl" style="margin-bottom:12px">Test details</div>
+  <div class="field"><label>Test name</label><input id="tb-name" placeholder="e.g. Arc Welding Fundamentals"></div>
+  <div class="rowf">
+    <div class="field"><label>Batch</label><select><option>2022-Welder</option><option>2025-Welder</option></select></div>
+    <div class="field"><label>Pass mark (%)</label><input type="number" value="50"></div>
+  </div>
+  <div class="rowf">
+    <div class="field" style="margin:0"><label>Opens</label><input type="date"></div>
+    <div class="field" style="margin:0"><label>Closes</label><input type="date"></div>
+  </div>
+</div>
+<div class="card">
+  <div class="head"><h3>Questions <span id="tq-count" class="muted" style="font-weight:500"></span></h3>
+    <div style="display:flex;gap:10px"><button class="btn btn-o btn-sm" data-add-bank>${ic('bank')} Add from bank</button><button class="btn btn-p btn-sm" data-add-new>${ic('plus')} New question</button></div>
+  </div>
+  <div id="tq-list"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:14px;padding-top:16px">
+    <span class="muted" style="font-size:var(--fs-meta)">MCQ / True-False only — objective questions per CTT scope.</span>
+    <div style="font-weight:600">Total marks: <b id="tq-total" style="color:var(--primary)">0</b></div>
+  </div>
+</div>`;
+
+V.attend=()=>`
+<div class="card">
+  <div class="tabs" data-tabs="att"><button class="active" data-p="mark">Mark attendance</button><button data-p="hist">Attendance history</button></div>
+  <div data-body="mark">
+    <div class="field" style="max-width:420px"><label><span style="color:var(--bad)">*</span> Select subject</label><select><option>2022-Welder</option><option>2025-Welder</option></select></div>
+    <div class="scroll-x"><table class="tbl"><thead><tr><th>Term</th><th>Date</th><th>Start</th><th>End</th><th></th></tr></thead><tbody>
+    ${[['2022-Welder','2026-07-23','09:00','10:00'],['2022-Welder','2026-07-22','11:00','12:30'],['2022-Welder','2026-07-21','09:00','10:00']].map(r=>`<tr><td class="nm">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td style="text-align:right"><button class="btn btn-p btn-sm" data-goto="markatt">${ic('calchk')} Mark attendance</button></td></tr>`).join('')}
+    </tbody></table></div>
+  </div>
+  <div data-body="hist" style="display:none">
+    <div class="scroll-x"><table class="tbl"><thead><tr><th>Date</th><th>Session</th><th>Present</th><th>Absent</th><th>Rate</th></tr></thead><tbody>
+    ${[['2026-07-21','Welder — Lecture',38,4,90],['2026-07-19','Welder — Practical',36,6,86],['2026-07-17','Welder — Theory',40,2,95]].map(r=>`<tr><td class="nm">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td><b style="color:${r[4]>=75?'var(--ok)':'var(--warn)'}">${r[4]}%</b></td></tr>`).join('')}
+    </tbody></table></div>
+  </div>
+</div>`;
+
+V.markatt=()=>`
+<a class="link" data-goto="attend" style="margin-bottom:16px">${ic('arrl')} Back to attendance</a>
+<div class="card">
+  <div class="head"><h3>Mark attendance · 2022-Welder · 23 Jul 2026</h3><div style="display:flex;gap:12px"><button class="btn btn-o btn-sm" data-goto="attend">Cancel</button><button class="btn btn-p btn-sm" data-submit-att>Submit</button></div></div>
+  <div class="lrow" style="font-weight:600;color:var(--muted);font-size:var(--fs-meta);text-transform:uppercase;letter-spacing:.5px"><span style="width:30px"></span><div style="flex:1">Student</div><div style="width:180px">Reason (if absent)</div><div style="width:56px;text-align:center">Present</div></div>
+  ${STUDENTS.map(s=>`<div class="lrow" data-attrow><span class="ava" style="width:32px;height:32px;font-size:11px">${initials(s.nm)}</span><div style="flex:1" class="nm">${s.nm}</div><div style="width:180px"><select style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--soft);color:var(--ink)"><option>—</option><option>Sick leave</option><option>Personal</option><option>Unexcused</option></select></div><div style="width:56px;display:flex;justify-content:center"><span class="ck on" data-check>${ic('tick')}</span></div></div>`).join('')}
+</div>`;
+
+V.mentor=()=>`
+<div class="infobox">${ic('info')}<div class="im"><b>You mentor 5 trainees.</b> Schedule 1:1 sessions here — the student gets an invite and joins via the meeting link once they accept. <b>Session ratings are collected from students and reviewed by the Program Office; they are not shown to mentors.</b></div></div>
+<div class="warnbox">${ic('flag')}<div><div class="wt">Missed-session flags</div><div class="wm"><b>Ajaybhai Patel</b> — 2 missed sessions · <b>Rakeshbhai Patel</b> — 1 missed. These are flagged to the Program Office when past the monthly threshold (FR-5.5).</div></div></div>
+<div class="stats">
+  <div class="stat">${chip('c-sky','handshake')}<div><div class="v">5</div><div class="k">My mentees</div></div></div>
+  <div class="stat">${chip('c-lav','calchk')}<div><div class="v">${MSESSIONS.length}</div><div class="k">Upcoming sessions</div></div></div>
+  <div class="stat">${chip('c-green','check')}<div><div class="v">11</div><div class="k">Completed</div></div></div>
+  <div class="stat"><span class="chip" style="background:var(--warn-bg);color:var(--warn)">${ic('flag')}</span><div><div class="v">2</div><div class="k">Flagged mentees</div></div></div>
+</div>
+<div class="card" style="margin-bottom:20px">
+  <div class="head"><h3>Upcoming sessions</h3><button class="btn btn-p btn-sm" data-schedmentor>${ic('plus')} Schedule session</button></div>
+  ${MSESSIONS.map(s=>'<div class="lrow"><span class="chip c-sky" style="width:38px;height:38px;border-radius:10px">'+ic('handshake')+'</span><div style="flex:1;min-width:0"><div class="nm">'+s.student+'</div><div class="mt">'+s.topic+' · '+s.date+' · '+s.time+'</div></div>'+(s.status==='Accepted'?pill('p-ok','Accepted')+'<button class="btn btn-o btn-sm" data-join style="margin-left:10px">'+ic('play')+' Join</button>':pill('p-warn','Awaiting acceptance'))+'</div>').join('')}
+</div>
+<div class="grid g2">
+  <div class="card">
+    <div class="head"><h3>Session history</h3><span class="muted" style="font-size:var(--fs-meta)">Completed</span></div>
+    ${MHISTORY.map(h=>lrow(h.student+' · '+h.date,h.topic,pill('p-ok','Completed'))).join('')}
+  </div>
+  <div class="card">
+    <div class="head"><h3>My mentees</h3></div>
+    ${MENTEES.map(m=>lrow(m.nm,m.batch+' · last session '+m.last,'<div style="display:flex;align-items:center;gap:10px">'+pill(m.std,m.stt)+'<button class="btn btn-o btn-sm" data-schedmentor data-nm="'+m.nm+'">Schedule</button></div>')).join('')}
+  </div>
+</div>`;
+
+V.forum=()=>`
+<div class="card" style="margin-bottom:20px">
+  <div class="head"><h3>Discussion topics</h3><button class="btn btn-p btn-sm" data-add="topic">${ic('plus')} New topic</button></div>
+  ${TOPICS.map((t,i)=>`<div class="lrow" data-open-topic="${i}" style="cursor:pointer"><span class="chip c-green" style="width:36px;height:36px;border-radius:10px">${ic('chat')}</span><div style="flex:1"><div class="nm">${t.t}</div><div class="mt">${t.batch} · ${t.posts} posts · created by ${t.by}</div></div>${t.scored===t.posts?pill('p-ok','All scored'):pill('p-warn',(t.posts-t.scored)+' to score')}</div>`).join('')}
+</div>
+<div class="card">
+  <div class="head"><h3>Common causes of weld defects</h3><span class="muted" style="font-size:var(--fs-meta)">2022-Welder · score participation &amp; merit</span></div>
+  <div class="infobox">${ic('info')}<div class="im"><b>Score each contribution.</b> Rate the merit of the point raised (1–5 stars). Scores log against the learner's record and feed result analysis and engagement reporting (FR-7.3, FR-7.4).</div></div>
+  ${POSTS.map(p=>`<div class="lrow"><span class="ava">${initials(p.nm)}</span><div style="flex:1"><div class="nm">${p.nm}</div><div class="mt" style="line-height:1.5">${p.mt}</div></div><div style="text-align:right">${stars(p.stars)}<div class="muted" style="font-size:var(--fs-meta);margin-top:4px">Merit ${p.stars}/5</div></div></div>`).join('')}
+</div>`;
+
+V.timetable=()=>`
+<div class="card">
+  <div class="head">
+    <div style="display:flex;align-items:center;gap:12px"><button class="btn btn-o btn-sm">${ic('arrl')}</button><button class="btn btn-o btn-sm">${ic('arr')}</button><h3>July 2026</h3></div>
+    <div class="seg"><button class="active">Month</button><button>Week</button><button>Day</button></div>
+  </div>
+  <div class="scroll-x"><table class="cal" id="cal"></table></div>
+</div>`;
+
+V.events=()=>`
+<div class="card" style="margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
+  <div class="search" style="grid-column:span 1">${ic('search')}<input placeholder="Search events..."></div>
+  <div class="field" style="margin:0"><select><option>Location</option><option>CTT Campus</option><option>Workshop</option></select></div>
+  <div class="field" style="margin:0"><select><option>Category</option><option>Cultural</option><option>Academic</option></select></div>
+  <div class="field" style="margin:0"><select><option>Type</option><option>Celebration</option><option>Visit</option></select></div>
+</div>
+<div class="card">
+  <div class="head"><h3>Events</h3></div>
+  <div class="grid g3">
+  ${EVENTS.map(e=>`<div class="evc"><div class="img" style="background:var(--grad)">${e[0]} ${e[1]}</div><div class="body"><div class="dt">${e[0]} ${e[1]}</div><div class="nm">${e[2]}</div><div class="ds">${e[3]}</div></div></div>`).join('')}
+  </div>
+</div>`;
+
+V.raise=()=>`
+<div class="grid g2">
+  <div class="card">
+    <div class="head"><h3>Raise a case</h3></div>
+    <div class="field"><label>Subject</label><input placeholder="Brief summary of your issue"></div>
+    <div class="rowf">
+      <div class="field"><label>Category</label><select><option>Academic / content</option><option>Attendance system</option><option>Assessment / grading</option><option>Account / login</option><option>Other</option></select></div>
+      <div class="field"><label>Priority</label><select><option>Normal</option><option>High</option><option>Urgent</option></select></div>
+    </div>
+    <div class="field"><label>Description</label><textarea placeholder="Describe the issue in detail..."></textarea></div>
+    <div class="infobox" style="margin:4px 0 16px">${ic('info')}<div class="im">Attachments are not supported — describe the issue in text and the support desk will follow up.</div></div>
+    <button class="btn btn-p" data-raise>${ic('help')} Submit case</button>
+  </div>
+  <div class="card" style="align-self:start">
+    <div class="head"><h3>My cases</h3><span class="muted" style="font-size:var(--fs-meta)">Select a case to view or resolve</span></div>
+    ${CASES.map(c=>`<div class="lrow" data-goto="casedetail" data-cid="${c.id}" style="cursor:pointer"><div style="flex:1"><div class="nm">#${c.id} · ${c.subj}</div><div class="mt">${c.cat} · ${c.age}</div></div>${pill(csp(c.status),c.status)}<span class="link" style="flex:none">${ic('arr')}</span></div>`).join('')}
+  </div>
+</div>`;
+
+V.casedetail=()=>{
+  const c=CASES.find(x=>x.id===SELCASE)||CASES[0];
+  const done=c.status==='Closed';
+  const resolved=c.status==='Resolved';
+  return `
+<a class="link" data-goto="raise" style="margin-bottom:16px">${ic('arrl')} Back to cases</a>
+<div class="card" style="margin-bottom:20px">
+  <div class="head" style="align-items:flex-start">
+    <div><div class="muted" style="font-size:var(--fs-meta)">Case #${c.id}</div><h2 style="font-size:var(--fs-pg);font-weight:700;margin-top:2px">${c.subj}</h2></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${pill(csp(c.status),c.status)}${done?'':(resolved?`<button class="btn btn-d btn-sm" data-close="${c.id}">${ic('x')} Close case</button>`:`<button class="btn btn-o btn-sm" data-resolve="${c.id}">${ic('check')} Resolve</button><button class="btn btn-d btn-sm" data-close="${c.id}">${ic('x')} Close case</button>`)}</div>
+  </div>
+  <div style="display:flex;gap:30px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px">
+    <div><div class="lbl">Category</div><div style="font-weight:600;margin-top:5px">${c.cat}</div></div>
+    <div><div class="lbl">Priority</div><div style="font-weight:600;margin-top:5px">${c.pri}</div></div>
+    <div><div class="lbl">Opened</div><div style="font-weight:600;margin-top:5px">${c.opened}</div></div>
+    <div><div class="lbl">Last update</div><div style="font-weight:600;margin-top:5px">${c.age}</div></div>
+  </div>
+</div>
+${done||resolved?`<div class="infobox">${ic('info')}<div class="im">This case is <b>${c.status.toLowerCase()}</b>. ${resolved?'Close it to archive, or reopen by replying to the support desk.':'Closed cases are archived and read-only.'}</div></div>`:''}
+<div class="grid g2">
+  <div class="card">
+    <div class="head"><h3>Description</h3></div>
+    <div style="line-height:1.65">${c.desc}</div>
+  </div>
+  <div class="card">
+    <div class="head"><h3>Activity</h3></div>
+    ${c.log.map(l=>lrow(l[1],l[2],'<div class="muted" style="font-size:var(--fs-meta);white-space:nowrap">'+l[0]+'</div>')).join('')}
+  </div>
+</div>`;
+};
+
+const FPROF={
+  personal:[
+    {t:'Bio',f:[['ID card name','Mateen Shaikh'],['Gender','Male'],['Date of birth','12-05-1986'],['Nationality','Indian'],['Country of residence','India']]},
+    {t:'Contact',f:[['Phone number','98250 47788'],['Email ID','mateen.shaikh.6788@ltpct.local']]},
+    {t:'Health card',f:[['Blood group','B+ve'],['Allergies','None'],['Others','None']]},
+    {t:'Permanent address',f:[['House / flat no','14'],['Street','MG Road'],['Suburb','Vapi'],['City','Valsad'],['Pincode','396191']]}
+  ],
+  professional:[
+    {t:'Employment',f:[['Employee ID','6788'],['Role','Faculty / Trainer'],['Trade','Welder'],['Date joined','01-06-2019'],['Employment type','Full-time']]},
+    {t:'Qualifications',f:[['Highest qualification','Diploma — Welding Technology'],['Certifications','AWS CWI · NSDC Trainer'],['Experience','9 years']]},
+    {t:'Mentoring role',f:[['Assigned mentor','Yes'],['Mentees','5'],['Review cycle','Monthly']]}
+  ],
+  assignments:[
+    {t:'Batches taught',f:[['2022-Welder','Section A · 42 students'],['2025-Welder','Section A · 23 students']]},
+    {t:'Subjects',f:[['Primary','Welder — Practical & Theory'],['Weekly sessions','12']]},
+    {t:'Mentees',f:[['Total','5'],['On track','3'],['Flagged','2']]}
+  ]
+};
+const FTABS=[['personal','Personal Details'],['professional','Professional'],['assignments','Assignments']];
+function profSections(D,tab){return D[tab].map(s=>'<div class="seccard"><div class="sec-h">'+s.t+'</div><div class="pkv">'+s.f.map(f=>'<div><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>').join('')+'</div></div>').join('');}
+function profEditForm(D,tab){return D[tab].map(s=>'<div class="sec-h" style="margin-top:6px">'+s.t+'</div><div class="rowf">'+s.f.map(f=>'<div class="field"><label>'+f[0]+'</label><input value="'+(''+f[1]).replace(/"/g,'&quot;')+'"></div>').join('')+'</div>').join('');}
+function scheduleForm(nm){const link='meet.ctt/'+Math.random().toString(36).slice(2,6)+'-'+Math.random().toString(36).slice(2,6);
+  return '<div class="rowf"><div class="field"><label>Mentee <span style="color:var(--bad)">*</span></label><select>'+MENTEES.map(m=>'<option'+(m.nm===nm?' selected':'')+'>'+m.nm+'</option>').join('')+'</select></div><div class="field"><label>Topic</label><input placeholder="e.g. Weld symbol reading"></div></div>'+
+    '<div class="rowf"><div class="field"><label>Date <span style="color:var(--bad)">*</span></label><input type="date"></div><div class="field"><label>Time <span style="color:var(--bad)">*</span></label><input type="time"></div></div>'+
+    '<div class="field" style="margin:0"><label>Meeting link (auto-generated)</label><input value="'+link+'" readonly></div>';}
+V.profile=()=>`
+<div class="card profhead" style="margin-bottom:20px">
+  <div class="ph-id">
+    <span class="ph-ava"><span class="ava lg" style="width:64px;height:64px;font-size:19px">MS</span><i class="ph-dot"></i></span>
+    <div><h2 style="font-size:var(--fs-pg);font-weight:700">Mateen Shaikh</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">ID 6788</div></div>
+  </div>
+  <div class="prog-badge"><div class="pb-t">Welder Faculty</div><div class="pb-s">Trainer &amp; Mentor · 2022 / 2025-Welder</div></div>
+</div>
+<div class="card">
+  <div class="tabs" data-tabs="prof">${FTABS.map((t,i)=>'<button class="'+(i===0?'active':'')+'" data-p="'+t[0]+'">'+t[1]+'</button>').join('')}</div>
+  ${FTABS.map((t,i)=>'<div data-body="'+t[0]+'"'+(i===0?'':' style="display:none"')+'><div style="display:flex;justify-content:flex-end;margin-bottom:16px"><button class="btn btn-p btn-sm" data-editprof="'+t[0]+'">'+ic('edit')+' Edit details</button></div><div class="grid g2e">'+profSections(FPROF,t[0])+'</div></div>').join('')}
+</div>`;
+function pill(c,t){return '<span class="pill '+c+'">'+t+'</span>';}
+function csp(s){return {Open:'p-warn','In progress':'p-info',Resolved:'p-ok',Closed:'p-neu'}[s]||'p-neu';}
+
+/* ---------- NAV / ROUTER ---------- */
+let SELSTU=1094;
+const NAV=[
+  ['home','home','Home'],
+  ['courses','book','My Courses'],
+  ['students','users','My Students'],
+  ['assess','clip','Assessments'],
+  ['attend','calchk','Attendance'],
+  ['mentor','handshake','Mentoring'],
+  ['forum','chat','Discussion Forum'],
+  ['timetable','cal','Timetable'],
+  ['events','award','Events'],
+  {label:'Support Services',icon:'help',children:[
+    ['raise','help','Raise a Case']
+  ]}
+];
+const T={
+  home:['Home','Faculty overview'],courses:['My Courses',''],course:['Course','My Courses › Course'],students:['My Students',''],student:['Student Record','My Students › Learner'],
+  content:['Course Content',''],qbank:['Question Bank',''],assess:['Assessments',''],
+  attend:['Attendance',''],markatt:['Mark Attendance','Attendance › Session'],mentor:['Mentoring',''],
+  forum:['Discussion Forum',''],timetable:['Timetable',''],events:['Events',''],raise:['Raise a Case',''],profile:['My Profile',''],
+  testview:['MCQ Test','Assessments › View'],testnew:['Test Builder','Assessments › Create'],
+  casedetail:['Case Details','Raise a Case › Case']
+};
+const NAVMAP={student:'students',markatt:'attend',testview:'assess',testnew:'assess',casedetail:'raise',course:'courses'};
+let SELTEST=0,TESTQ=[],TQEDIT=-1,SELCASE='4821',BACKTO='students',CEDIT=-1,SUBTEST=0,RESCOURSE=null;
+
+const nav=document.getElementById('nav');
+function navLink(id,i,l){const a=document.createElement('a');a.dataset.goto=id;a.innerHTML=ic(i)+'<span>'+l+'</span>';return a;}
+NAV.forEach(item=>{
+  if(Array.isArray(item)){nav.appendChild(navLink(item[0],item[1],item[2]));return;}
+  const p=document.createElement('div');p.className='parent';
+  p.innerHTML='<svg class="pi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="'+ICONS[item.icon]+'"/></svg><span>'+item.label+'</span>'+ic('cv','cv');
+  nav.appendChild(p);
+  const sub=document.createElement('div');sub.className='sub';
+  item.children.forEach(([id,i,l])=>sub.appendChild(navLink(id,i,l)));
+  nav.appendChild(sub);
+});
+nav.querySelectorAll('.parent').forEach(p=>p.addEventListener('click',()=>p.classList.toggle('open')));
+const lw=document.createElement('div');lw.className='logout';const lo=document.createElement('a');lo.dataset.exit='1';lo.innerHTML=ic('logout')+'<span>Logout</span>';lw.appendChild(lo);nav.appendChild(lw);
+
+const views=document.getElementById('views');
+function render(id){
+  views.innerHTML='<section class="view active">'+(typeof V[id]==='function'?V[id]():V[id])+'</section>';
+  const navId=NAVMAP[id]||id;
+  document.querySelectorAll('#nav > a, #nav .sub a').forEach(a=>a.classList.toggle('active',a.dataset.goto===navId));
+  document.querySelectorAll('#nav .parent').forEach(p=>{
+    const hasActive=[...p.nextElementSibling.querySelectorAll('a')].some(a=>a.classList.contains('active'));
+    if(hasActive)p.classList.add('open');
+  });
+  document.getElementById('pg-title').textContent=(T[id]||['',''])[0];
+  document.getElementById('pg-crumb').textContent=(T[id]||['',''])[1];
+  if(id==='timetable')cal();
+  if(id==='testnew')renderTestQ();
+  if(id==='assess'){RESCOURSE=null;renderResults();}
+  scrollTo(0,0);
+}
+
+/* ---------- MODALS ---------- */
+let modalAction=null;
+function openModal(html,action){modalAction=action||null;const m=document.getElementById('modal');m.innerHTML=html;m.classList.add('show');}
+function closeModal(){const m=document.getElementById('modal');m.classList.remove('show');m.innerHTML='';modalAction=null;}
+function confirmModal(c,i,title,msg,confirmLabel,action){
+  openModal('<div class="mbox"><div class="micon '+c+'">'+ic(i)+'</div><div class="mtitle">'+title+'</div><div class="mmsg">'+msg+'</div><div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-mconfirm>'+confirmLabel+'</button></div></div>',action);
+}
+function formModal(title,body,confirmLabel,action){
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">'+title+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div>'+body+'<div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-mconfirm>'+confirmLabel+'</button></div></div>',action);
+}
+const F={
+  question:()=>['Add question','<div class="field"><label>Question text</label><textarea placeholder="Type the question..."></textarea></div><div class="rowf"><div class="field"><label>Type</label><select><option>Multiple choice</option><option>True / False</option></select></div><div class="field"><label>Marks</label><input type="number" value="5"></div></div><div class="field"><label>Options (mark the correct one)</label><input placeholder="Option A" style="margin-bottom:8px"><input placeholder="Option B" style="margin-bottom:8px"><input placeholder="Option C"></div>','Add to bank'],
+  test:()=>['Create MCQ test','<div class="field"><label>Test name</label><input placeholder="e.g. Arc Welding Fundamentals"></div><div class="rowf"><div class="field"><label>Batch</label><select><option>2022-Welder</option><option>2025-Welder</option></select></div><div class="field"><label>Questions from bank</label><input type="number" value="10"></div></div><div class="rowf"><div class="field"><label>Opens</label><input type="date"></div><div class="field"><label>Closes</label><input type="date"></div></div>','Create test'],
+  manual:(nm)=>['Enter score manually — '+(nm||''),'<div class="infobox" style="margin-top:0">'+ic('info')+'<div class="im">Manual score entry is the fallback for offline attempts (FR-4.3).</div></div><div class="rowf"><div class="field"><label>Score</label><input type="number" placeholder="/ 40"></div><div class="field"><label>Out of</label><input type="number" value="40"></div></div><div class="field"><label>Note (optional)</label><input placeholder="e.g. paper-based attempt"></div>','Save score'],
+  session:(nm)=>['Log mentoring session','<div class="rowf"><div class="field"><label>Mentee</label><select>'+MENTEES.map(m=>'<option'+(m.nm===nm?' selected':'')+'>'+m.nm+'</option>').join('')+'</select></div><div class="field"><label>Date</label><input type="date"></div></div><div class="field"><label>Topics covered</label><input placeholder="e.g. weld symbol reading, workshop confidence"></div><div class="field"><label>Observations</label><textarea placeholder="Notes for the longitudinal profile..."></textarea></div><div class="field" style="margin:0"><label>Attendance</label><select><option>Present</option><option>Absent</option></select></div>','Log session'],
+  topic:()=>['New discussion topic','<div class="field"><label>Topic</label><input placeholder="e.g. Best safety practice you follow"></div><div class="rowf"><div class="field"><label>Batch</label><select><option>2022-Welder</option><option>2025-Welder</option></select></div><div class="field"><label>Sub-group (optional)</label><input placeholder="e.g. Section A"></div></div>','Create topic'],
+  activity:()=>['Add activity','<div class="rowf"><div class="field"><label>Type</label><select><option>Assignment</option><option>Assessment</option><option>Forum</option></select></div><div class="field"><label>Batch</label><select><option>2022-Welder</option><option>2025-Welder</option></select></div></div><div class="field"><label>Title</label><input placeholder="Activity title"></div>','Add'],
+  resource:()=>['Add resource','<div class="rowf"><div class="field"><label>Type</label><select><option>Presentation</option><option>PDF handout</option><option>Video (link)</option><option>Link</option></select></div><div class="field"><label>Language</label><select><option>English</option><option>Hindi</option><option>Gujarati</option></select></div></div><div class="field"><label>Title</label><input placeholder="Resource title"></div><div class="field" style="margin:0"><label>URL / embed link</label><input placeholder="https://..."></div>','Publish']
+};
+function toast(c,i,title,msg){confirmModal(c,i,title,msg,'Done',null);
+  document.querySelector('#modal [data-mclose]').style.display='none';}
+
+/* ---------- TEST BUILDER ---------- */
+function renderTestQ(){
+  const list=document.getElementById('tq-list');if(!list)return;
+  if(!TESTQ.length){list.innerHTML='<div class="muted" style="padding:18px 0;text-align:center">No questions yet — use <b>Add from bank</b> to pull existing questions, or <b>New question</b> to write one.</div>';}
+  else{list.innerHTML=TESTQ.map((q,i)=>'<div class="qrow"><span class="qn">'+(i+1)+'.</span><span class="qt">'+q.q+'</span><span class="pill p-info">'+q.type+'</span><b style="color:var(--primary);width:60px;text-align:right">'+q.marks+' Mk</b><button class="btn btn-o btn-sm" data-tq-edit="'+i+'" style="margin-left:12px" title="Edit">'+ic('edit')+'</button><button class="btn btn-d btn-sm" data-tq-del="'+i+'" title="Remove">'+ic('x')+'</button></div>').join('');}
+  const c=document.getElementById('tq-count');if(c)c.textContent=TESTQ.length?'('+TESTQ.length+')':'';
+  const t=document.getElementById('tq-total');if(t)t.textContent=TESTQ.reduce((s,q)=>s+(q.marks||0),0);
+}
+function openBankModal(){
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">Add from question bank</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div>'+
+    '<div style="max-height:52vh;overflow:auto;margin-bottom:6px">'+QUESTIONS.map((q,i)=>'<label class="qrow" data-bankrow style="cursor:pointer"><span class="ck" data-qi="'+i+'">'+ic('tick')+'</span><span class="qt">'+q.q+'</span><span class="pill p-info">'+q.type+'</span><b style="color:var(--primary);width:52px;text-align:right">'+q.marks+'</b></label>').join('')+'</div>'+
+    '<div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-bank-confirm>Add selected</button></div></div>');
+}
+function openNewQModal(edit){
+  TQEDIT=(typeof edit==='number')?edit:-1;
+  const q=TQEDIT>=0?TESTQ[TQEDIT]:{q:'',type:'Multiple choice',marks:5};
+  const tf=q.type==='True / False';
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">'+(TQEDIT>=0?'Edit question':'New question')+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div>'+
+    '<div class="field"><label>Question text</label><textarea id="nq-text" placeholder="Type the question...">'+q.q+'</textarea></div>'+
+    '<div class="rowf"><div class="field"><label>Type</label><select id="nq-type"><option'+(!tf?' selected':'')+'>Multiple choice</option><option'+(tf?' selected':'')+'>True / False</option></select></div><div class="field"><label>Marks</label><input id="nq-marks" type="number" value="'+q.marks+'"></div></div>'+
+    '<div class="field" style="margin-bottom:0"><label>Options (tick the correct one)</label>'+[0,1,2,3].map(i=>'<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px"><span class="ck" data-check>'+ic('tick')+'</span><input placeholder="Option '+String.fromCharCode(65+i)+'"></div>').join('')+'</div>'+
+    '<div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-nq-confirm>'+(TQEDIT>=0?'Save question':'Add question')+'</button></div></div>');
+}
+
+/* ---------- EVENTS ---------- */
+document.addEventListener('click',e=>{
+  if(e.target.id==='modal'){closeModal();return;}
+  if(e.target.closest('[data-exit]')){location.href='index.html';return;}
+  if(e.target.closest('[data-mclose]')){closeModal();return;}
+  if(e.target.closest('[data-mconfirm]')){const a=modalAction;closeModal();if(a)a();return;}
+
+  // test builder
+  const nt=e.target.closest('[data-newtest]');if(nt){BACKTO=nt.dataset.back||'assess';TESTQ=[];render('testnew');return;}
+  // course content
+  if(e.target.closest('[data-add-content]')){openContentModal();return;}
+  const ec=e.target.closest('[data-edit-content]');if(ec){openContentModal(parseInt(ec.dataset.editContent,10));return;}
+  const dc=e.target.closest('[data-del-content]');if(dc){(CONTENT[CURCLASS]||[]).splice(parseInt(dc.dataset.delContent,10),1);CEDIT=-1;closeModal();renderCourseContent();return;}
+  if(e.target.closest('[data-content-confirm]')){
+    const item={type:document.getElementById('ct-type').value,mod:document.getElementById('ct-mod').value,title:(document.getElementById('ct-title').value||'').trim()||'Untitled',url:(document.getElementById('ct-url').value||'').trim(),pub:document.getElementById('ct-pub').classList.contains('on')};
+    if(!CONTENT[CURCLASS])CONTENT[CURCLASS]=[];
+    if(CEDIT>=0)CONTENT[CURCLASS][CEDIT]=item;else CONTENT[CURCLASS].push(item);
+    CEDIT=-1;closeModal();renderCourseContent();return;}
+  // results & scoring by course
+  const rc=e.target.closest('[data-res-course]');if(rc){RESCOURSE=rc.dataset.resCourse;renderResults();return;}
+  if(e.target.closest('[data-res-back]')){RESCOURSE=null;renderResults();return;}
+  // submissions
+  const sb=e.target.closest('[data-subs]');if(sb){openSubsModal(parseInt(sb.dataset.subs,10));return;}
+  const vs=e.target.closest('[data-view-sub]');if(vs){openSubView(parseInt(vs.dataset.viewSub,10));return;}
+  const et=e.target.closest('[data-edittest]');
+  if(et){if(et.dataset.back)BACKTO=et.dataset.back;SELTEST=parseInt(et.dataset.edittest,10)||0;TESTQ=QUESTIONS.slice(0,Math.min(TESTS[SELTEST].qs,QUESTIONS.length)).map(q=>({...q}));render('testnew');const h=document.getElementById('tb-mode');if(h)h.textContent='Edit MCQ test';const n=document.getElementById('tb-name');if(n)n.value=TESTS[SELTEST].nm;return;}
+  if(e.target.closest('[data-add-bank]')){openBankModal();return;}
+  if(e.target.closest('[data-add-new]')){openNewQModal();return;}
+  const brow=e.target.closest('[data-bankrow]');if(brow){brow.querySelector('.ck').classList.toggle('on');return;}
+  if(e.target.closest('[data-bank-confirm]')){document.querySelectorAll('#modal .ck.on').forEach(ck=>{const qi=parseInt(ck.dataset.qi,10);if(!isNaN(qi))TESTQ.push({...QUESTIONS[qi]});});closeModal();renderTestQ();return;}
+  if(e.target.closest('[data-nq-confirm]')){
+    const txt=(document.getElementById('nq-text').value||'').trim()||'Untitled question';
+    const type=document.getElementById('nq-type').value;const marks=parseInt(document.getElementById('nq-marks').value,10)||0;
+    if(TQEDIT>=0)TESTQ[TQEDIT]={q:txt,type,marks};else TESTQ.push({q:txt,type,marks});
+    TQEDIT=-1;closeModal();renderTestQ();return;}
+  const tqe=e.target.closest('[data-tq-edit]');if(tqe){openNewQModal(parseInt(tqe.dataset.tqEdit,10));return;}
+  const tqd=e.target.closest('[data-tq-del]');if(tqd){TESTQ.splice(parseInt(tqd.dataset.tqDel,10),1);renderTestQ();return;}
+  if(e.target.closest('[data-save-test]')){render(BACKTO);toast('c-green','check','Test saved','Saved as draft with <b>'+TESTQ.length+' questions</b> ('+TESTQ.reduce((s,q)=>s+(q.marks||0),0)+' marks). Publish it when the window is set.');return;}
+  if(e.target.closest('[data-publish-test]')){if(!TESTQ.length){toast('c-amber','alert','No questions','Add at least one question before publishing.');return;}confirmModal('c-sky','clip','Publish test','Publish this MCQ test with <b>'+TESTQ.length+' questions</b> to the batch? Learners can attempt it within the set window.','Publish',()=>render(BACKTO));return;}
+
+  // case actions
+  const cres=e.target.closest('[data-resolve]');
+  if(cres){const c=CASES.find(x=>x.id===cres.dataset.resolve);if(c)confirmModal('c-green','check','Resolve case','Mark case <b>#'+c.id+'</b> as resolved? You can still close it afterwards.','Resolve',()=>{c.status='Resolved';c.age='just now';c.log.push(['28 Jul 2026','You','Marked resolved']);render('casedetail');});return;}
+  const cclo=e.target.closest('[data-close]');
+  if(cclo){const c=CASES.find(x=>x.id===cclo.dataset.close);if(c)confirmModal('c-amber','alert','Close case','Close case <b>#'+c.id+'</b>? Closed cases are archived and become read-only.','Close case',()=>{c.status='Closed';c.age='just now';c.log.push(['28 Jul 2026','You','Case closed']);render('casedetail');});return;}
+
+  const ep=e.target.closest('[data-editprof]');
+  if(ep){const tab=ep.dataset.editprof;const nm=FTABS.find(t=>t[0]===tab)[1];formModal('Edit '+nm,profEditForm(FPROF,tab),'Save changes',()=>toast('c-green','check','Profile updated','Your '+nm.toLowerCase()+' have been saved.'));return;}
+  const sm=e.target.closest('[data-schedmentor]');
+  if(sm){const nm=sm.dataset.nm||'';formModal('Schedule mentoring session',scheduleForm(nm),'Send invite',()=>toast('c-sky','handshake','Invite sent','A session invite'+(nm?' to '+nm:'')+' has been sent. The student confirms by accepting it.'));return;}
+  if(e.target.closest('[data-join]')){toast('c-sky','play','Joining session','This is a demo meeting link — the live version opens the video call.');return;}
+  const add=e.target.closest('[data-add]');
+  if(add){const key=add.dataset.add;const nm=add.dataset.nm;const f=F[key];if(f){const [t,b,cl]=f(nm);formModal(t,b,cl,()=>toast('c-green','check','Saved','Your changes have been saved.'));}return;}
+
+  const oc=e.target.closest('[data-open-class]');if(oc){CURCLASS=oc.dataset.openClass;render('course');return;}
+  const ot=e.target.closest('[data-open-topic]');if(ot){render('forum');scrollTo(0,400);return;}
+  const raise=e.target.closest('[data-raise]');if(raise){toast('c-green','check','Case submitted','Your case has been raised. The support desk will respond by email.');return;}
+  const sub=e.target.closest('[data-submit-att]');if(sub){confirmModal('c-green','check','Submit attendance','Submit attendance for <b>2022-Welder · 23 Jul</b>?','Submit',()=>{render('attend');});return;}
+
+  const row=e.target.closest('[data-goto]');
+  if(row){e.preventDefault();if(row.dataset.sid)SELSTU=parseInt(row.dataset.sid,10);if(row.dataset.tid)SELTEST=parseInt(row.dataset.tid,10);if(row.dataset.cid)SELCASE=row.dataset.cid;if(row.dataset.back)BACKTO=row.dataset.back;render(row.dataset.goto);return;}
+
+  const cseg=e.target.closest('[data-classseg] button');if(cseg){CURCLASS=cseg.dataset.class;render('students');return;}
+
+  const tb=e.target.closest('.tabs button');if(tb){const w=tb.closest('.tabs');w.querySelectorAll('button').forEach(b=>b.classList.remove('active'));tb.classList.add('active');if(tb.dataset.p){const sc=w.closest('.card')||document;sc.querySelectorAll('[data-body]').forEach(b=>b.style.display=b.dataset.body===tb.dataset.p?'':'none');}return;}
+  const sg=e.target.closest('.seg:not([data-classseg]) button');if(sg){sg.closest('.seg').querySelectorAll('button').forEach(b=>b.classList.remove('active'));sg.classList.add('active');return;}
+  const ah=e.target.closest('.acc-h');if(ah){ah.closest('.acc').classList.toggle('open');return;}
+
+  const rad=e.target.closest('[data-radio]');if(rad){rad.closest('.card').querySelectorAll('[data-radio]').forEach(x=>x.classList.remove('on'));rad.classList.add('on');return;}
+  const ck=e.target.closest('[data-check]');if(ck){ck.classList.toggle('on');return;}
+
+  const st=e.target.closest('[data-stars] svg');if(st){const wrap=st.closest('[data-stars]');const kids=[...wrap.children];const idx=kids.indexOf(st);kids.forEach((k,i)=>k.classList.toggle('on',i<=idx));const lbl=wrap.parentElement.querySelector('.muted');if(lbl&&/Merit/.test(lbl.textContent))lbl.textContent='Merit '+(idx+1)+'/5';return;}
+});
+
+/* live search */
+document.addEventListener('input',e=>{
+  const s=e.target.closest('[data-search]');if(!s)return;
+  const q=s.value.toLowerCase();const scope=s.closest('.card');
+  const tbl=scope.querySelector('[data-searchtable]');if(!tbl)return;
+  tbl.querySelectorAll('tbody tr, [data-row]').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';});
+});
+
+/* ---------- CALENDAR ---------- */
+function cal(){
+  const b=document.getElementById('cal');if(!b)return;const first=3,dim=31;let d=1-first;
+  let h='<thead><tr>'+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>';
+  for(let w=0;w<6;w++){h+='<tr>';for(let i=0;i<7;i++){
+    if(d<1||d>dim){h+='<td class="out"><span class="dn">'+(d<1?30+d:d-dim)+'</span></td>';}
+    else{const ev=(i>=1&&i<=6)?'<div class="cev">Welder — Lecture</div>':'';h+='<td class="'+(d===23?'today':'')+'"><span class="dn">'+d+'</span>'+ev+'</td>';}
+    d++;}h+='</tr>';if(d>dim)break;}
+  b.innerHTML=h+'</tbody>';
+}
+
+/* light theme only */
+document.documentElement.setAttribute('data-theme','light');
+render('home');
+</script>
