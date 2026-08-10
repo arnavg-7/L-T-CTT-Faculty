@@ -161,6 +161,18 @@
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);background:var(--card)}
   .rowf{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 
+  .profhead{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .ph-id{display:flex;align-items:center;gap:18px}
+  .ph-ava{position:relative;display:inline-grid}
+  .ph-dot{position:absolute;bottom:3px;right:3px;width:14px;height:14px;border-radius:50%;background:var(--ok);border:2.5px solid var(--card)}
+  .prog-badge{background:var(--chip-sky);border-radius:14px;padding:15px 22px;min-width:200px}
+  .prog-badge .pb-t{font-weight:700;color:var(--ink)}
+  .prog-badge .pb-s{font-size:var(--fs-meta);color:var(--muted);margin-top:3px}
+  .seccard{border:1px solid var(--line);border-radius:var(--r-sm);padding:18px 20px;background:var(--soft)}
+  .sec-h{font-weight:600;margin-bottom:15px}
+  .pkv{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px 18px}
+  .pkv .k{font-size:var(--fs-meta);color:var(--muted)}
+  .pkv .v{font-weight:600;margin-top:4px;overflow-wrap:anywhere}
   .kv{display:grid;grid-template-columns:1fr 1fr;gap:20px}
   .kv .k{font-size:var(--fs-meta);color:var(--muted)}
   .kv .v{font-weight:600;margin-top:3px}
@@ -886,30 +898,38 @@ ${done||resolved?`<div class="infobox">${ic('info')}<div class="im">This case is
 </div>`;
 };
 
+const FPROF={
+  personal:[
+    {t:'Bio',f:[['ID card name','Mateen Shaikh'],['Gender','Male'],['Date of birth','12-05-1986'],['Nationality','Indian'],['Country of residence','India']]},
+    {t:'Contact',f:[['Phone number','98250 47788'],['Email ID','mateen.shaikh.6788@ltpct.local']]},
+    {t:'Health card',f:[['Blood group','B+ve'],['Allergies','None'],['Others','None']]},
+    {t:'Permanent address',f:[['House / flat no','14'],['Street','MG Road'],['Suburb','Vapi'],['City','Valsad'],['Pincode','396191']]}
+  ],
+  professional:[
+    {t:'Employment',f:[['Employee ID','6788'],['Role','Faculty / Trainer'],['Trade','Welder'],['Date joined','01-06-2019'],['Employment type','Full-time']]},
+    {t:'Qualifications',f:[['Highest qualification','Diploma — Welding Technology'],['Certifications','AWS CWI · NSDC Trainer'],['Experience','9 years']]},
+    {t:'Mentoring role',f:[['Assigned mentor','Yes'],['Mentees','5'],['Review cycle','Monthly']]}
+  ],
+  assignments:[
+    {t:'Batches taught',f:[['2022-Welder','Section A · 42 students'],['2025-Welder','Section A · 23 students']]},
+    {t:'Subjects',f:[['Primary','Welder — Practical & Theory'],['Weekly sessions','12']]},
+    {t:'Mentees',f:[['Total','5'],['On track','3'],['Flagged','2']]}
+  ]
+};
+const FTABS=[['personal','Personal Details'],['professional','Professional'],['assignments','Assignments']];
+function profSections(D,tab){return D[tab].map(s=>'<div class="seccard"><div class="sec-h">'+s.t+'</div><div class="pkv">'+s.f.map(f=>'<div><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>').join('')+'</div></div>').join('');}
+function profEditForm(D,tab){return D[tab].map(s=>'<div class="sec-h" style="margin-top:6px">'+s.t+'</div><div class="rowf">'+s.f.map(f=>'<div class="field"><label>'+f[0]+'</label><input value="'+(''+f[1]).replace(/"/g,'&quot;')+'"></div>').join('')+'</div>').join('');}
 V.profile=()=>`
-<div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:22px;flex-wrap:wrap">
-  <span class="ava lg" style="width:64px;height:64px;font-size:19px">MS</span>
-  <div style="flex:1;min-width:180px"><h2 style="font-size:var(--fs-pg);font-weight:700">Mateen Shaikh</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">ID 6788 · Welder Faculty · Mentor</div></div>
-  <span class="pill p-ok">${ic('check')} Active</span>
+<div class="card profhead" style="margin-bottom:20px">
+  <div class="ph-id">
+    <span class="ph-ava"><span class="ava lg" style="width:64px;height:64px;font-size:19px">MS</span><i class="ph-dot"></i></span>
+    <div><h2 style="font-size:var(--fs-pg);font-weight:700">Mateen Shaikh</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">ID 6788</div></div>
+  </div>
+  <div class="prog-badge"><div class="pb-t">Welder Faculty</div><div class="pb-s">Trainer &amp; Mentor · 2022 / 2025-Welder</div></div>
 </div>
 <div class="card">
-  <div class="tabs" data-tabs="prof"><button class="active">Profile</button><button>Assignments</button></div>
-  <div class="grid g2e">
-    <div>
-      <div class="head"><h3>Details</h3></div>
-      <div class="kv">
-        <div><div class="k">Role</div><div class="v">Faculty / Trainer</div></div>
-        <div><div class="k">Also mentor</div><div class="v">Yes · 5 mentees</div></div>
-        <div><div class="k">Trade</div><div class="v">Welder</div></div>
-        <div><div class="k">Batches</div><div class="v">2022, 2025-Welder</div></div>
-      </div>
-    </div>
-    <div>
-      <div class="head"><h3>Contact</h3><button class="btn btn-o btn-sm">${ic('edit')} Edit</button></div>
-      <div class="field"><label>Phone</label><input value="98250 47788"></div>
-      <div class="field" style="margin:0"><label>Email</label><input value="mateen.shaikh.6788@ltpct.local"></div>
-    </div>
-  </div>
+  <div class="tabs" data-tabs="prof">${FTABS.map((t,i)=>'<button class="'+(i===0?'active':'')+'" data-p="'+t[0]+'">'+t[1]+'</button>').join('')}</div>
+  ${FTABS.map((t,i)=>'<div data-body="'+t[0]+'"'+(i===0?'':' style="display:none"')+'><div style="display:flex;justify-content:flex-end;margin-bottom:16px"><button class="btn btn-p btn-sm" data-editprof="'+t[0]+'">'+ic('edit')+' Edit details</button></div><div class="grid g2e">'+profSections(FPROF,t[0])+'</div></div>').join('')}
 </div>`;
 function pill(c,t){return '<span class="pill '+c+'">'+t+'</span>';}
 function csp(s){return {Open:'p-warn','In progress':'p-info',Resolved:'p-ok',Closed:'p-neu'}[s]||'p-neu';}
@@ -1064,6 +1084,8 @@ document.addEventListener('click',e=>{
   const cclo=e.target.closest('[data-close]');
   if(cclo){const c=CASES.find(x=>x.id===cclo.dataset.close);if(c)confirmModal('c-amber','alert','Close case','Close case <b>#'+c.id+'</b>? Closed cases are archived and become read-only.','Close case',()=>{c.status='Closed';c.age='just now';c.log.push(['28 Jul 2026','You','Case closed']);render('casedetail');});return;}
 
+  const ep=e.target.closest('[data-editprof]');
+  if(ep){const tab=ep.dataset.editprof;const nm=FTABS.find(t=>t[0]===tab)[1];formModal('Edit '+nm,profEditForm(FPROF,tab),'Save changes',()=>toast('c-green','check','Profile updated','Your '+nm.toLowerCase()+' have been saved.'));return;}
   const add=e.target.closest('[data-add]');
   if(add){const key=add.dataset.add;const nm=add.dataset.nm;const f=F[key];if(f){const [t,b,cl]=f(nm);formModal(t,b,cl,()=>toast('c-green','check','Saved','Your changes have been saved.'));}return;}
 
