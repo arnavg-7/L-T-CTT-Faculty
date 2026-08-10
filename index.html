@@ -414,6 +414,16 @@ const SESLOG=[
   ['15 Jul 2026','Bhavin Halpati','Follow-up on practical assessment prep','Present'],
   ['02 Jun 2026','Ajaybhai Patel','Attendance concern — personal circumstances noted','Present']
 ];
+const MSESSIONS=[
+  {student:'Jeelkumar Tandel',date:'02 Aug 2026',time:'10:00 AM',topic:'Weld symbol reading follow-up',status:'Accepted'},
+  {student:'Ajaybhai Patel',date:'03 Aug 2026',time:'02:00 PM',topic:'Attendance & workshop confidence',status:'Pending'},
+  {student:'Hardik Rathod',date:'05 Aug 2026',time:'11:00 AM',topic:'Apprenticeship pathway',status:'Pending'}
+];
+const MHISTORY=[
+  {student:'Jeelkumar Tandel',date:'18 Jul 2026',topic:'Weld symbols; workshop confidence'},
+  {student:'Hardik Rathod',date:'16 Jul 2026',topic:'Career guidance — ITI to apprenticeship'},
+  {student:'Bhavin Halpati',date:'15 Jul 2026',topic:'Practical assessment prep'}
+];
 const TOPICS=[
   {t:'Common causes of weld defects — share what you have seen',batch:'2022-Welder',posts:14,scored:9,by:'You'},
   {t:'Best safety practice you follow every day',batch:'2022-Welder',posts:9,scored:9,by:'You'},
@@ -795,22 +805,26 @@ V.markatt=()=>`
 </div>`;
 
 V.mentor=()=>`
-<div class="infobox">${ic('info')}<div class="im"><b>You are assigned as mentor</b> for 5 trainees in 2022-Welder. Mentoring is an independent assignment — a mentor need not be the batch's faculty (FRD FR-5.2). Log at least one session per mentee each month.</div></div>
+<div class="infobox">${ic('info')}<div class="im"><b>You mentor 5 trainees.</b> Schedule 1:1 sessions here — the student gets an invite and joins via the meeting link once they accept. <b>Session ratings are collected from students and reviewed by the Program Office; they are not shown to mentors.</b></div></div>
 <div class="warnbox">${ic('flag')}<div><div class="wt">Missed-session flags</div><div class="wm"><b>Ajaybhai Patel</b> — 2 missed sessions · <b>Rakeshbhai Patel</b> — 1 missed. These are flagged to the Program Office when past the monthly threshold (FR-5.5).</div></div></div>
 <div class="stats">
   <div class="stat">${chip('c-sky','handshake')}<div><div class="v">5</div><div class="k">My mentees</div></div></div>
-  <div class="stat">${chip('c-green','calchk')}<div><div class="v">11</div><div class="k">Sessions this term</div></div></div>
+  <div class="stat">${chip('c-lav','calchk')}<div><div class="v">${MSESSIONS.length}</div><div class="k">Upcoming sessions</div></div></div>
+  <div class="stat">${chip('c-green','check')}<div><div class="v">11</div><div class="k">Completed</div></div></div>
   <div class="stat"><span class="chip" style="background:var(--warn-bg);color:var(--warn)">${ic('flag')}</span><div><div class="v">2</div><div class="k">Flagged mentees</div></div></div>
-  <div class="stat">${chip('c-lav','clock')}<div><div class="v">2</div><div class="k">Due this cycle</div></div></div>
+</div>
+<div class="card" style="margin-bottom:20px">
+  <div class="head"><h3>Upcoming sessions</h3><button class="btn btn-p btn-sm" data-schedmentor>${ic('plus')} Schedule session</button></div>
+  ${MSESSIONS.map(s=>'<div class="lrow"><span class="chip c-sky" style="width:38px;height:38px;border-radius:10px">'+ic('handshake')+'</span><div style="flex:1;min-width:0"><div class="nm">'+s.student+'</div><div class="mt">'+s.topic+' · '+s.date+' · '+s.time+'</div></div>'+(s.status==='Accepted'?pill('p-ok','Accepted')+'<button class="btn btn-o btn-sm" data-join style="margin-left:10px">'+ic('play')+' Join</button>':pill('p-warn','Awaiting acceptance'))+'</div>').join('')}
 </div>
 <div class="grid g2">
   <div class="card">
-    <div class="head"><h3>My mentees</h3><button class="btn btn-p btn-sm" data-add="session">${ic('plus')} Log session</button></div>
-    ${MENTEES.map(m=>lrow(m.nm,m.batch+' · last session '+m.last+' · '+m.ses+' logged','<div style="display:flex;align-items:center;gap:10px">'+pill(m.std,m.stt)+'<button class="btn btn-o btn-sm" data-add="session" data-nm="'+m.nm+'">Log</button></div>')).join('')}
+    <div class="head"><h3>Session history</h3><span class="muted" style="font-size:var(--fs-meta)">Completed</span></div>
+    ${MHISTORY.map(h=>lrow(h.student+' · '+h.date,h.topic,pill('p-ok','Completed'))).join('')}
   </div>
   <div class="card">
-    <div class="head"><h3>Recent session log</h3><span class="muted" style="font-size:var(--fs-meta)">Monthly cadence</span></div>
-    ${SESLOG.map(x=>lrow(x[1]+' · '+x[0],x[2],pill('p-ok',x[3]))).join('')}
+    <div class="head"><h3>My mentees</h3></div>
+    ${MENTEES.map(m=>lrow(m.nm,m.batch+' · last session '+m.last,'<div style="display:flex;align-items:center;gap:10px">'+pill(m.std,m.stt)+'<button class="btn btn-o btn-sm" data-schedmentor data-nm="'+m.nm+'">Schedule</button></div>')).join('')}
   </div>
 </div>`;
 
@@ -919,6 +933,10 @@ const FPROF={
 const FTABS=[['personal','Personal Details'],['professional','Professional'],['assignments','Assignments']];
 function profSections(D,tab){return D[tab].map(s=>'<div class="seccard"><div class="sec-h">'+s.t+'</div><div class="pkv">'+s.f.map(f=>'<div><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>').join('')+'</div></div>').join('');}
 function profEditForm(D,tab){return D[tab].map(s=>'<div class="sec-h" style="margin-top:6px">'+s.t+'</div><div class="rowf">'+s.f.map(f=>'<div class="field"><label>'+f[0]+'</label><input value="'+(''+f[1]).replace(/"/g,'&quot;')+'"></div>').join('')+'</div>').join('');}
+function scheduleForm(nm){const link='meet.ctt/'+Math.random().toString(36).slice(2,6)+'-'+Math.random().toString(36).slice(2,6);
+  return '<div class="rowf"><div class="field"><label>Mentee <span style="color:var(--bad)">*</span></label><select>'+MENTEES.map(m=>'<option'+(m.nm===nm?' selected':'')+'>'+m.nm+'</option>').join('')+'</select></div><div class="field"><label>Topic</label><input placeholder="e.g. Weld symbol reading"></div></div>'+
+    '<div class="rowf"><div class="field"><label>Date <span style="color:var(--bad)">*</span></label><input type="date"></div><div class="field"><label>Time <span style="color:var(--bad)">*</span></label><input type="time"></div></div>'+
+    '<div class="field" style="margin:0"><label>Meeting link (auto-generated)</label><input value="'+link+'" readonly></div>';}
 V.profile=()=>`
 <div class="card profhead" style="margin-bottom:20px">
   <div class="ph-id">
@@ -1086,6 +1104,9 @@ document.addEventListener('click',e=>{
 
   const ep=e.target.closest('[data-editprof]');
   if(ep){const tab=ep.dataset.editprof;const nm=FTABS.find(t=>t[0]===tab)[1];formModal('Edit '+nm,profEditForm(FPROF,tab),'Save changes',()=>toast('c-green','check','Profile updated','Your '+nm.toLowerCase()+' have been saved.'));return;}
+  const sm=e.target.closest('[data-schedmentor]');
+  if(sm){const nm=sm.dataset.nm||'';formModal('Schedule mentoring session',scheduleForm(nm),'Send invite',()=>toast('c-sky','handshake','Invite sent','A session invite'+(nm?' to '+nm:'')+' has been sent. The student confirms by accepting it.'));return;}
+  if(e.target.closest('[data-join]')){toast('c-sky','play','Joining session','This is a demo meeting link — the live version opens the video call.');return;}
   const add=e.target.closest('[data-add]');
   if(add){const key=add.dataset.add;const nm=add.dataset.nm;const f=F[key];if(f){const [t,b,cl]=f(nm);formModal(t,b,cl,()=>toast('c-green','check','Saved','Your changes have been saved.'));}return;}
 
