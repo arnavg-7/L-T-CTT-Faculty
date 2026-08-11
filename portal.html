@@ -415,14 +415,12 @@ const SESLOG=[
   ['02 Jun 2026','Ajaybhai Patel','Attendance concern — personal circumstances noted','Present']
 ];
 const MSESSIONS=[
-  {student:'Jeelkumar Tandel',date:'02 Aug 2026',time:'10:00 AM',topic:'Weld symbol reading follow-up',status:'Accepted'},
-  {student:'Ajaybhai Patel',date:'03 Aug 2026',time:'02:00 PM',topic:'Attendance & workshop confidence',status:'Pending'},
-  {student:'Hardik Rathod',date:'05 Aug 2026',time:'11:00 AM',topic:'Apprenticeship pathway',status:'Pending'}
-];
-const MHISTORY=[
-  {student:'Jeelkumar Tandel',date:'18 Jul 2026',topic:'Weld symbols; workshop confidence'},
-  {student:'Hardik Rathod',date:'16 Jul 2026',topic:'Career guidance — ITI to apprenticeship'},
-  {student:'Bhavin Halpati',date:'15 Jul 2026',topic:'Practical assessment prep'}
+  {student:'Jeelkumar Tandel',date:'12 Aug 2026',time:'10:00 AM',topic:'Weld symbol reading follow-up',status:'Due',remark:''},
+  {student:'Ajaybhai Patel',date:'14 Aug 2026',time:'02:00 PM',topic:'Attendance & workshop confidence',status:'Pending',remark:''},
+  {student:'Hardik Rathod',date:'16 Aug 2026',time:'11:00 AM',topic:'Apprenticeship pathway',status:'Accepted',remark:''},
+  {student:'Bhavin Halpati',date:'05 Aug 2026',time:'10:00 AM',topic:'Practical assessment prep',status:'Completed',remark:'Went well — confident for the practical test.'},
+  {student:'Hardik Rathod',date:'02 Aug 2026',time:'11:00 AM',topic:'Career guidance',status:'Completed',remark:'Discussed apprenticeship options.'},
+  {student:'Rakeshbhai Patel',date:'28 Jul 2026',time:'03:00 PM',topic:'Attendance concern',status:'Missed',remark:''}
 ];
 const TOPICS=[
   {t:'Common causes of weld defects — share what you have seen',batch:'2022-Welder',posts:14,scored:9,by:'You'},
@@ -581,7 +579,7 @@ function courseAssess(c){
     tests.map(({t,i})=>'<tr><td class="nm">'+t.nm+'</td><td>'+t.qs+'</td><td>'+t.marks+'</td><td>'+t.win+'</td><td>'+pill(t.status==='Published'?'p-ok':'p-neu',t.status)+'</td>'+
       '<td style="text-align:right;white-space:nowrap"><button class="btn btn-o btn-sm" data-subs="'+i+'">'+ic('users')+' Submissions</button> <button class="btn btn-o btn-sm" data-edittest="'+i+'" data-back="course">'+ic('edit')+' Edit</button></td></tr>').join('')+
     '</tbody></table></div>':'<div class="muted" style="padding:20px 0;text-align:center">No assessments yet for this course.</div>';
-  return '<div class="head"><h3>Assessments</h3><button class="btn btn-p btn-sm" data-newtest data-back="course">'+ic('plus')+' Create assessment</button></div>'+body;
+  return '<div class="head"><h3>Assessments</h3><button class="btn btn-p btn-sm" data-newtest data-back="course" data-course="'+c.name+'">'+ic('plus')+' Create assessment</button></div>'+body;
 }
 V.courses=()=>`
 <div class="card">
@@ -595,7 +593,8 @@ function resGrades(t){
   return '<div class="scroll-x"><table class="tbl"><thead><tr><th>Student</th><th>Mode</th><th>Score</th><th>Result</th><th></th></tr></thead><tbody>'+
     STUDENTS.slice(0,8).map((s,i)=>{const online=i%4!==0;const sc=online?scores[i]:null;const pass=sc>=t.marks*0.5;
       return '<tr><td class="nm">'+s.nm+'</td><td>'+(online?pill('p-info','Online'):pill('p-neu','Not attempted'))+'</td><td>'+(online?sc+' / '+t.marks:'—')+'</td><td>'+(online?pill(pass?'p-ok':'p-bad',pass?'Passed':'Retake'):pill('p-warn','Awaiting'))+'</td><td style="text-align:right">'+(online?'':'<button class="btn btn-o btn-sm" data-add="manual" data-nm="'+s.nm+'">'+ic('edit')+' Enter score</button>')+'</td></tr>';}).join('')+
-    '</tbody></table></div>';
+    '</tbody></table></div>'+
+    '<div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)"><span class="muted" style="font-size:var(--fs-meta)">After entering or editing scores, publish to finalise the marks.</span><button class="btn btn-p btn-sm" data-publishmarks="'+t.nm+'">'+ic('check')+' Publish marks</button></div>';
 }
 function resCourseCard(c){
   const n=TESTS.filter(t=>t.batch===c.name).length;
@@ -712,11 +711,7 @@ V.assess=()=>`
 <div class="card">
   <div class="tabs" data-tabs="asx"><button class="active" data-p="tests">MCQ tests</button><button data-p="results">Results & scoring</button></div>
   <div data-body="tests">
-    <div class="head"><h3>MCQ tests</h3><button class="btn btn-p btn-sm" data-newtest data-back="assess">${ic('plus')} Create test</button></div>
-    <div class="muted" style="font-size:var(--fs-meta);margin-bottom:6px">Select a test to view its questions, or create a new one.</div>
-    <div class="scroll-x"><table class="tbl"><thead><tr><th>Test</th><th>Batch</th><th>Questions</th><th>Marks</th><th>Window</th><th>Attempts</th><th>Status</th></tr></thead><tbody>
-    ${TESTS.map((t,i)=>`<tr data-goto="testview" data-tid="${i}" data-back="assess"><td class="nm">${t.nm}</td><td>${t.batch}</td><td>${t.qs}</td><td>${t.marks}</td><td>${t.win}</td><td>${t.attempts}</td><td>${pill(t.status==='Published'?'p-ok':'p-neu',t.status)}</td></tr>`).join('')}
-    </tbody></table></div>
+    <div id="tests-body"></div>
   </div>
   <div data-body="results" style="display:none">
     <div class="infobox" style="margin-top:0">${ic('info')}<div class="im"><b>Online + manual scoring.</b> Online attempts are auto-scored; use <b>Enter score</b> for offline attempts (FR-4.3). Results roll up per course (FR-4.4).</div></div>
@@ -753,7 +748,7 @@ V.testnew=()=>`
   <div class="lbl" style="margin-bottom:12px">Test details</div>
   <div class="field"><label>Test name</label><input id="tb-name" placeholder="e.g. Arc Welding Fundamentals"></div>
   <div class="rowf">
-    <div class="field"><label>Batch</label><select><option>2022-Welder</option><option>2025-Welder</option></select></div>
+    <div class="field"><label>Course / Batch</label><select id="tb-batch">${CLASSES.map(c=>'<option'+(c.name===TB_COURSE?' selected':'')+'>'+c.name+'</option>').join('')}</select></div>
     <div class="field"><label>Pass mark (%)</label><input type="number" value="50"></div>
   </div>
   <div class="rowf">
@@ -796,29 +791,41 @@ V.markatt=()=>`
   ${STUDENTS.map(s=>`<div class="lrow" data-attrow><span class="ava" style="width:32px;height:32px;font-size:11px">${initials(s.nm)}</span><div style="flex:1" class="nm">${s.nm}</div><div style="width:180px"><select style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--soft);color:var(--ink)"><option>—</option><option>Sick leave</option><option>Personal</option><option>Unexcused</option></select></div><div style="width:56px;display:flex;justify-content:center"><span class="ck on" data-check>${ic('tick')}</span></div></div>`).join('')}
 </div>`;
 
-V.mentor=()=>`
-<div class="infobox">${ic('info')}<div class="im"><b>You mentor 5 trainees.</b> Schedule 1:1 sessions here — the student gets an invite and joins via the meeting link once they accept. <b>Session ratings are collected from students and reviewed by the Program Office; they are not shown to mentors.</b></div></div>
-<div class="warnbox">${ic('flag')}<div><div class="wt">Missed-session flags</div><div class="wm"><b>Ajaybhai Patel</b> — 2 missed sessions · <b>Rakeshbhai Patel</b> — 1 missed. These are flagged to the Program Office when past the monthly threshold (FR-5.5).</div></div></div>
+V.mentor=()=>{
+  const upcoming=MSESSIONS.map((s,i)=>({s,i})).filter(x=>['Pending','Accepted','Due'].includes(x.s.status));
+  const history=MSESSIONS.map((s,i)=>({s,i})).filter(x=>['Completed','Missed'].includes(x.s.status));
+  const completed=MSESSIONS.filter(s=>s.status==='Completed').length;
+  function sessRow(x){const s=x.s;let right;
+    if(s.status==='Due')right='<span class="pill p-warn">Due now</span><button class="btn btn-p btn-sm" data-marksession="'+x.i+':Completed" style="margin-left:8px">'+ic('check')+' Completed</button><button class="btn btn-d btn-sm" data-marksession="'+x.i+':Missed" style="margin-left:8px">Missed</button>';
+    else if(s.status==='Accepted')right=pill('p-ok','Accepted')+'<button class="btn btn-o btn-sm" data-join style="margin-left:10px">'+ic('play')+' Join</button>';
+    else right=pill('p-warn','Awaiting acceptance');
+    return '<div class="lrow"><span class="chip c-sky" style="width:38px;height:38px;border-radius:10px">'+ic('handshake')+'</span><div style="flex:1;min-width:0"><div class="nm">'+s.student+'</div><div class="mt">'+s.topic+' · '+s.date+' · '+s.time+'</div></div>'+right+'</div>';
+  }
+  function histRow(x){const s=x.s;
+    return '<div class="lrow"><span class="chip '+(s.status==='Completed'?'c-green':'')+'" style="width:38px;height:38px;border-radius:10px'+(s.status==='Missed'?';background:var(--bad-bg);color:var(--bad)':'')+'">'+ic(s.status==='Completed'?'check':'x')+'</span><div style="flex:1;min-width:0"><div class="nm">'+s.student+' · '+s.date+'</div><div class="mt">'+s.topic+(s.remark?' — “'+s.remark+'”':'')+'</div></div>'+pill(s.status==='Completed'?'p-ok':'p-bad',s.status)+(s.status==='Completed'?'<button class="btn btn-o btn-sm" data-remark="'+x.i+'" style="margin-left:10px">'+ic('edit')+' '+(s.remark?'Edit':'Add')+' remark</button>':'')+'</div>';
+  }
+  return `
+<div class="infobox">${ic('info')}<div class="im"><b>You mentor 5 trainees.</b> Schedule 1:1 sessions — the student accepts and joins via the meeting link. Once a session's time arrives, mark it <b>Completed</b> or <b>Missed</b>, and add a remark for completed sessions. <b>Student ratings are reviewed by the Program Office and are not shown to mentors.</b></div></div>
 <div class="stats">
   <div class="stat">${chip('c-sky','handshake')}<div><div class="v">5</div><div class="k">My mentees</div></div></div>
-  <div class="stat">${chip('c-lav','calchk')}<div><div class="v">${MSESSIONS.length}</div><div class="k">Upcoming sessions</div></div></div>
-  <div class="stat">${chip('c-green','check')}<div><div class="v">11</div><div class="k">Completed</div></div></div>
+  <div class="stat">${chip('c-lav','calchk')}<div><div class="v">${upcoming.length}</div><div class="k">Upcoming sessions</div></div></div>
+  <div class="stat">${chip('c-green','check')}<div><div class="v">${completed}</div><div class="k">Completed</div></div></div>
   <div class="stat"><span class="chip" style="background:var(--warn-bg);color:var(--warn)">${ic('flag')}</span><div><div class="v">2</div><div class="k">Flagged mentees</div></div></div>
 </div>
 <div class="card" style="margin-bottom:20px">
   <div class="head"><h3>Upcoming sessions</h3><button class="btn btn-p btn-sm" data-schedmentor>${ic('plus')} Schedule session</button></div>
-  ${MSESSIONS.map(s=>'<div class="lrow"><span class="chip c-sky" style="width:38px;height:38px;border-radius:10px">'+ic('handshake')+'</span><div style="flex:1;min-width:0"><div class="nm">'+s.student+'</div><div class="mt">'+s.topic+' · '+s.date+' · '+s.time+'</div></div>'+(s.status==='Accepted'?pill('p-ok','Accepted')+'<button class="btn btn-o btn-sm" data-join style="margin-left:10px">'+ic('play')+' Join</button>':pill('p-warn','Awaiting acceptance'))+'</div>').join('')}
+  ${upcoming.length?upcoming.map(sessRow).join(''):'<div class="muted" style="padding:14px 0">No upcoming sessions — schedule one.</div>'}
 </div>
-<div class="grid g2">
-  <div class="card">
-    <div class="head"><h3>Session history</h3><span class="muted" style="font-size:var(--fs-meta)">Completed</span></div>
-    ${MHISTORY.map(h=>lrow(h.student+' · '+h.date,h.topic,pill('p-ok','Completed'))).join('')}
-  </div>
-  <div class="card">
-    <div class="head"><h3>My mentees</h3></div>
+<div class="card">
+  <div class="tabs" data-tabs="ment"><button class="active" data-p="mentees">My mentees</button><button data-p="history">Session history</button></div>
+  <div data-body="mentees">
     ${MENTEES.map(m=>lrow(m.nm,m.batch+' · last session '+m.last,'<div style="display:flex;align-items:center;gap:10px">'+pill(m.std,m.stt)+'<button class="btn btn-o btn-sm" data-schedmentor data-nm="'+m.nm+'">Schedule</button></div>')).join('')}
   </div>
+  <div data-body="history" style="display:none">
+    ${history.length?history.map(histRow).join(''):'<div class="muted" style="padding:14px 0">No completed or missed sessions yet.</div>'}
+  </div>
 </div>`;
+};
 
 V.forum=()=>`
 <div class="card" style="margin-bottom:20px">
@@ -912,6 +919,21 @@ const FPROF={
 const FTABS=[['personal','Personal Details'],['professional','Professional'],['assignments','Assignments']];
 function profSections(D,tab){return D[tab].map(s=>'<div class="seccard"><div class="sec-h">'+s.t+'</div><div class="pkv">'+s.f.map(f=>'<div><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>').join('')+'</div></div>').join('');}
 function profEditForm(D,tab){return D[tab].map(s=>'<div class="sec-h" style="margin-top:6px">'+s.t+'</div><div class="rowf">'+s.f.map(f=>'<div class="field"><label>'+f[0]+'</label><input value="'+(''+f[1]).replace(/"/g,'&quot;')+'"></div>').join('')+'</div>').join('');}
+function openRemark(i){REMARKIDX=i;const s=MSESSIONS[i];
+  openModal('<div class="mbox wide"><div class="head" style="margin-bottom:16px"><h3>Session remark — '+s.student+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div><div class="muted" style="font-size:var(--fs-meta);margin-bottom:12px">'+s.topic+' · '+s.date+'</div><div class="field" style="margin:0"><label>Remark</label><textarea id="remark-txt" placeholder="How did the session go? Notes for the record...">'+(s.remark||'')+'</textarea></div><div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-remark-save>Save remark</button></div></div>');
+}
+function testCourseCard(c){const n=TESTS.filter(t=>t.batch===c.name).length;
+  return '<div class="clscard" data-test-course="'+c.id+'"><div class="cc-top">'+chip(c.chip,c.ic)+'<div class="cc-h"><div class="cc-nm">'+c.name+'</div><div class="cc-sub">Section '+(c.sec||'—')+' · '+c.students+' student'+(c.students===1?'':'s')+'</div></div><span class="cc-arr">'+ic('arr')+'</span></div><div class="cc-foot"><span>'+ic('clip')+'<b>'+n+'</b> MCQ tests</span><span>'+ic('users')+'<b>'+c.students+'</b> learners</span></div></div>';
+}
+function renderTests(){
+  const el=document.getElementById('tests-body');if(!el)return;
+  if(!TESTCOURSE){el.innerHTML='<div class="muted" style="font-size:var(--fs-meta);margin-bottom:16px">Select a course to view or create its MCQ tests.</div><div class="grid g3">'+CLASSES.map(testCourseCard).join('')+'</div>';return;}
+  const c=CLASSES.find(x=>x.id===TESTCOURSE)||CLASSES[0];
+  const tests=TESTS.map((t,i)=>({t,i})).filter(x=>x.t.batch===c.name);
+  el.innerHTML='<a class="link" data-test-back style="margin-bottom:14px;display:inline-flex">'+ic('arrl')+' All courses</a>'+
+    '<div class="head"><h3>'+c.name+' · MCQ tests</h3><button class="btn btn-p btn-sm" data-newtest data-back="assess" data-course="'+c.name+'">'+ic('plus')+' Create test</button></div>'+
+    (tests.length?'<div class="scroll-x"><table class="tbl"><thead><tr><th>Test</th><th>Questions</th><th>Marks</th><th>Window</th><th>Attempts</th><th>Status</th></tr></thead><tbody>'+tests.map(x=>'<tr data-goto="testview" data-tid="'+x.i+'" data-back="assess"><td class="nm">'+x.t.nm+'</td><td>'+x.t.qs+'</td><td>'+x.t.marks+'</td><td>'+x.t.win+'</td><td>'+x.t.attempts+'</td><td>'+pill(x.t.status==='Published'?'p-ok':'p-neu',x.t.status)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="muted" style="padding:16px 0">No MCQ tests for this course yet — create one.</div>');
+}
 function scheduleForm(nm){const link='meet.ctt/'+Math.random().toString(36).slice(2,6)+'-'+Math.random().toString(36).slice(2,6);
   return '<div class="rowf"><div class="field"><label>Mentee <span style="color:var(--bad)">*</span></label><select>'+MENTEES.map(m=>'<option'+(m.nm===nm?' selected':'')+'>'+m.nm+'</option>').join('')+'</select></div><div class="field"><label>Topic</label><input placeholder="e.g. Weld symbol reading"></div></div>'+
     '<div class="rowf"><div class="field"><label>Date <span style="color:var(--bad)">*</span></label><input type="date"></div><div class="field"><label>Time <span style="color:var(--bad)">*</span></label><input type="time"></div></div>'+
@@ -955,7 +977,7 @@ const T={
   casedetail:['Case Details','Raise a Case › Case']
 };
 const NAVMAP={student:'students',markatt:'attend',testview:'assess',testnew:'assess',casedetail:'raise',course:'courses'};
-let SELTEST=0,TESTQ=[],TQEDIT=-1,SELCASE='4821',BACKTO='students',CEDIT=-1,SUBTEST=0,RESCOURSE=null;
+let SELTEST=0,TESTQ=[],TQEDIT=-1,SELCASE='4821',BACKTO='students',CEDIT=-1,SUBTEST=0,RESCOURSE=null,TESTCOURSE=null,TB_COURSE='',REMARKIDX=-1;
 
 const nav=document.getElementById('nav');
 function navLink(id,i,l){const a=document.createElement('a');a.dataset.goto=id;a.innerHTML=ic(i)+'<span>'+l+'</span>';return a;}
@@ -984,7 +1006,7 @@ function render(id){
   document.getElementById('pg-crumb').textContent=(T[id]||['',''])[1];
   if(id==='timetable')cal();
   if(id==='testnew')renderTestQ();
-  if(id==='assess'){RESCOURSE=null;renderResults();}
+  if(id==='assess'){RESCOURSE=null;TESTCOURSE=null;renderResults();renderTests();}
   scrollTo(0,0);
 }
 
@@ -1001,7 +1023,7 @@ function formModal(title,body,confirmLabel,action){
 const F={
   question:()=>['Add question','<div class="field"><label>Question text</label><textarea placeholder="Type the question..."></textarea></div><div class="rowf"><div class="field"><label>Type</label><select><option>Multiple choice</option><option>True / False</option></select></div><div class="field"><label>Marks</label><input type="number" value="5"></div></div><div class="field"><label>Options (mark the correct one)</label><input placeholder="Option A" style="margin-bottom:8px"><input placeholder="Option B" style="margin-bottom:8px"><input placeholder="Option C"></div>','Add to bank'],
   test:()=>['Create MCQ test','<div class="field"><label>Test name</label><input placeholder="e.g. Arc Welding Fundamentals"></div><div class="rowf"><div class="field"><label>Batch</label><select><option>2022-Welder</option><option>2025-Welder</option></select></div><div class="field"><label>Questions from bank</label><input type="number" value="10"></div></div><div class="rowf"><div class="field"><label>Opens</label><input type="date"></div><div class="field"><label>Closes</label><input type="date"></div></div>','Create test'],
-  manual:(nm)=>['Enter score manually — '+(nm||''),'<div class="infobox" style="margin-top:0">'+ic('info')+'<div class="im">Manual score entry is the fallback for offline attempts (FR-4.3).</div></div><div class="rowf"><div class="field"><label>Score</label><input type="number" placeholder="/ 40"></div><div class="field"><label>Out of</label><input type="number" value="40"></div></div><div class="field"><label>Note (optional)</label><input placeholder="e.g. paper-based attempt"></div>','Save score'],
+  manual:(nm)=>['Enter score manually — '+(nm||''),'<div class="infobox" style="margin-top:0">'+ic('info')+'<div class="im">Manual score entry is the fallback for offline attempts (FR-4.3).</div></div><div class="rowf"><div class="field"><label>Score</label><input type="number" placeholder="/ 40"></div><div class="field"><label>Out of</label><input type="number" value="40"></div></div><div class="field"><label>Note (optional)</label><input placeholder="e.g. paper-based attempt"></div>','Submit marks'],
   session:(nm)=>['Log mentoring session','<div class="rowf"><div class="field"><label>Mentee</label><select>'+MENTEES.map(m=>'<option'+(m.nm===nm?' selected':'')+'>'+m.nm+'</option>').join('')+'</select></div><div class="field"><label>Date</label><input type="date"></div></div><div class="field"><label>Topics covered</label><input placeholder="e.g. weld symbol reading, workshop confidence"></div><div class="field"><label>Observations</label><textarea placeholder="Notes for the longitudinal profile..."></textarea></div><div class="field" style="margin:0"><label>Attendance</label><select><option>Present</option><option>Absent</option></select></div>','Log session'],
   topic:()=>['New discussion topic','<div class="field"><label>Topic</label><input placeholder="e.g. Best safety practice you follow"></div><div class="rowf"><div class="field"><label>Batch</label><select><option>2022-Welder</option><option>2025-Welder</option></select></div><div class="field"><label>Sub-group (optional)</label><input placeholder="e.g. Section A"></div></div>','Create topic'],
   activity:()=>['Add activity','<div class="rowf"><div class="field"><label>Type</label><select><option>Assignment</option><option>Assessment</option><option>Forum</option></select></div><div class="field"><label>Batch</label><select><option>2022-Welder</option><option>2025-Welder</option></select></div></div><div class="field"><label>Title</label><input placeholder="Activity title"></div>','Add'],
@@ -1042,7 +1064,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-mconfirm]')){const a=modalAction;closeModal();if(a)a();return;}
 
   // test builder
-  const nt=e.target.closest('[data-newtest]');if(nt){BACKTO=nt.dataset.back||'assess';TESTQ=[];render('testnew');return;}
+  const nt=e.target.closest('[data-newtest]');if(nt){BACKTO=nt.dataset.back||'assess';TB_COURSE=nt.dataset.course||'';TESTQ=[];render('testnew');return;}
   // course content
   if(e.target.closest('[data-add-content]')){openContentModal();return;}
   const ec=e.target.closest('[data-edit-content]');if(ec){openContentModal(parseInt(ec.dataset.editContent,10));return;}
@@ -1055,6 +1077,12 @@ document.addEventListener('click',e=>{
   // results & scoring by course
   const rc=e.target.closest('[data-res-course]');if(rc){RESCOURSE=rc.dataset.resCourse;renderResults();return;}
   if(e.target.closest('[data-res-back]')){RESCOURSE=null;renderResults();return;}
+  const tc=e.target.closest('[data-test-course]');if(tc){TESTCOURSE=tc.dataset.testCourse;renderTests();return;}
+  if(e.target.closest('[data-test-back]')){TESTCOURSE=null;renderTests();return;}
+  const pm=e.target.closest('[data-publishmarks]');if(pm){const nm=pm.dataset.publishmarks;confirmModal('c-green','check','Publish marks','Publish the marks for <b>'+nm+'</b> to the learner records? They become visible to students and roll up in reports.','Publish',()=>toast('c-green','check','Marks published','Marks for '+nm+' are now published.'));return;}
+  const mk=e.target.closest('[data-marksession]');if(mk){const p=mk.dataset.marksession.split(':');MSESSIONS[+p[0]].status=p[1];render('mentor');if(p[1]==='Completed')openRemark(+p[0]);return;}
+  const rmk=e.target.closest('[data-remark]');if(rmk){openRemark(+rmk.dataset.remark);return;}
+  if(e.target.closest('[data-remark-save]')){const t=document.getElementById('remark-txt');if(REMARKIDX>=0)MSESSIONS[REMARKIDX].remark=t?t.value.trim():'';closeModal();render('mentor');return;}
   // submissions
   const sb=e.target.closest('[data-subs]');if(sb){openSubsModal(parseInt(sb.dataset.subs,10));return;}
   const vs=e.target.closest('[data-view-sub]');if(vs){openSubView(parseInt(vs.dataset.viewSub,10));return;}
@@ -1086,7 +1114,7 @@ document.addEventListener('click',e=>{
   if(sm){const nm=sm.dataset.nm||'';formModal('Schedule mentoring session',scheduleForm(nm),'Send invite',()=>toast('c-sky','handshake','Invite sent','A session invite'+(nm?' to '+nm:'')+' has been sent. The student confirms by accepting it.'));return;}
   if(e.target.closest('[data-join]')){window.open('https://meet.google.com/new','_blank','noopener');return;}
   const add=e.target.closest('[data-add]');
-  if(add){const key=add.dataset.add;const nm=add.dataset.nm;const f=F[key];if(f){const [t,b,cl]=f(nm);formModal(t,b,cl,()=>toast('c-green','check','Saved','Your changes have been saved.'));}return;}
+  if(add){const key=add.dataset.add;const nm=add.dataset.nm;const f=F[key];if(f){const [t,b,cl]=f(nm);formModal(t,b,cl,()=>{if(key==='manual')toast('c-green','check','Marks submitted','Marks for '+(nm||'the student')+' have been submitted to the record.');else toast('c-green','check','Saved','Your changes have been saved.');});}return;}
 
   const oc=e.target.closest('[data-open-class]');if(oc){CURCLASS=oc.dataset.openClass;render('course');return;}
   const ot=e.target.closest('[data-open-topic]');if(ot){render('forum');scrollTo(0,400);return;}
