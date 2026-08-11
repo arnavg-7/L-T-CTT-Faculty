@@ -436,14 +436,6 @@ const POSTS=[
   {nm:'Lalubhai Hadal',mt:'Moisture on electrodes. We store them in the oven now.',stars:3},
   {nm:'Ajaybhai Patel',mt:'defects happen',stars:1}
 ];
-const EVENTS=[
-  ['Aug','15','Independence Day Celebration','Flag hoisting and cultural programme at the CTT campus.','c-amber'],
-  ['Aug','18','Ganesh Chaturthi','Pooja and lunch for all trainees and faculty.','c-green'],
-  ['Sep','05','Teachers Day','Felicitation of CTT faculty and mentors.','c-sky'],
-  ['Oct','21','Industry Exposure Visit','Welder & Fitter batches — L&T fabrication yard tour.','c-lav'],
-  ['Dec','21','Christmas Party','Carols, games and a shared meal to close the term.','c-sky'],
-  ['May','01','Labour Day','Workshop closed — skilled-worker recognition day.','c-green']
-];
 const TODAY=[
   ['09:00 – 10:00','Welder — Lecture','2022-Welder · Section A · Room 4','var(--chip-green-i)'],
   ['11:00 – 12:30','Welder — Practical','Workshop 2 · 2022-Welder','var(--chip-green-i)'],
@@ -848,19 +840,6 @@ V.timetable=()=>`
   <div class="scroll-x"><table class="cal" id="cal"></table></div>
 </div>`;
 
-V.events=()=>`
-<div class="card" style="margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
-  <div class="search" style="grid-column:span 1">${ic('search')}<input placeholder="Search events..."></div>
-  <div class="field" style="margin:0"><select><option>Location</option><option>CTT Campus</option><option>Workshop</option></select></div>
-  <div class="field" style="margin:0"><select><option>Category</option><option>Cultural</option><option>Academic</option></select></div>
-  <div class="field" style="margin:0"><select><option>Type</option><option>Celebration</option><option>Visit</option></select></div>
-</div>
-<div class="card">
-  <div class="head"><h3>Events</h3></div>
-  <div class="grid g3">
-  ${EVENTS.map(e=>`<div class="evc"><div class="img" style="background:var(--grad)">${e[0]} ${e[1]}</div><div class="body"><div class="dt">${e[0]} ${e[1]}</div><div class="nm">${e[2]}</div><div class="ds">${e[3]}</div></div></div>`).join('')}
-  </div>
-</div>`;
 
 V.raise=()=>`
 <div class="grid g2">
@@ -963,7 +942,6 @@ const NAV=[
   ['mentor','handshake','Mentoring'],
   ['forum','chat','Discussion Forum'],
   ['timetable','cal','Timetable'],
-  ['events','award','Events'],
   {label:'Support Services',icon:'help',children:[
     ['raise','help','Raise a Case']
   ]}
@@ -972,7 +950,7 @@ const T={
   home:['Home','Faculty overview'],courses:['My Courses',''],course:['Course','My Courses › Course'],students:['My Students',''],student:['Student Record','My Students › Learner'],
   content:['Course Content',''],qbank:['Question Bank',''],assess:['Assessments',''],
   attend:['Attendance',''],markatt:['Mark Attendance','Attendance › Session'],mentor:['Mentoring',''],
-  forum:['Discussion Forum',''],timetable:['Timetable',''],events:['Events',''],raise:['Raise a Case',''],profile:['My Profile',''],
+  forum:['Discussion Forum',''],timetable:['Timetable',''],raise:['Raise a Case',''],profile:['My Profile',''],
   testview:['MCQ Test','Assessments › View'],testnew:['Test Builder','Assessments › Create'],
   casedetail:['Case Details','Raise a Case › Case']
 };
