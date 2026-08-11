@@ -1106,7 +1106,7 @@ document.addEventListener('click',e=>{
   if(ep){const tab=ep.dataset.editprof;const nm=FTABS.find(t=>t[0]===tab)[1];formModal('Edit '+nm,profEditForm(FPROF,tab),'Save changes',()=>toast('c-green','check','Profile updated','Your '+nm.toLowerCase()+' have been saved.'));return;}
   const sm=e.target.closest('[data-schedmentor]');
   if(sm){const nm=sm.dataset.nm||'';formModal('Schedule mentoring session',scheduleForm(nm),'Send invite',()=>toast('c-sky','handshake','Invite sent','A session invite'+(nm?' to '+nm:'')+' has been sent. The student confirms by accepting it.'));return;}
-  if(e.target.closest('[data-join]')){toast('c-sky','play','Joining session','This is a demo meeting link — the live version opens the video call.');return;}
+  if(e.target.closest('[data-join]')){window.open('https://meet.google.com/new','_blank','noopener');return;}
   const add=e.target.closest('[data-add]');
   if(add){const key=add.dataset.add;const nm=add.dataset.nm;const f=F[key];if(f){const [t,b,cl]=f(nm);formModal(t,b,cl,()=>toast('c-green','check','Saved','Your changes have been saved.'));}return;}
 
