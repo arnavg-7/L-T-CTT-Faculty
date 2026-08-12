@@ -843,7 +843,7 @@ V.mentor=()=>{
 
 V.forum=()=>`
 <div class="card" style="margin-bottom:20px">
-  <div class="head"><h3>Discussion topics</h3><button class="btn btn-p btn-sm" data-add="topic">${ic('plus')} New topic</button></div>
+  <div class="head"><h3>Discussion topics</h3><button class="btn btn-p btn-sm" data-newtopic>${ic('plus')} Post topic</button></div>
   ${TOPICS.map((t,i)=>`<div class="lrow" data-open-topic="${i}" style="cursor:pointer"><span class="chip c-green" style="width:36px;height:36px;border-radius:10px">${ic('chat')}</span><div style="flex:1"><div class="nm">${t.t}</div><div class="mt">${t.batch} · ${t.posts} posts · created by ${t.by}</div></div>${t.scored===t.posts?pill('p-ok','All scored'):pill('p-warn',(t.posts-t.scored)+' to score')}</div>`).join('')}
 </div>
 <div class="card">
@@ -933,6 +933,9 @@ const FPROF={
 const FTABS=[['personal','Personal Details'],['professional','Professional'],['assignments','Assignments']];
 function profSections(D,tab){return D[tab].map(s=>'<div class="seccard"><div class="sec-h">'+s.t+'</div><div class="pkv">'+s.f.map(f=>'<div><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>').join('')+'</div></div>').join('');}
 function profEditForm(D,tab){return D[tab].map(s=>'<div class="sec-h" style="margin-top:6px">'+s.t+'</div><div class="rowf">'+s.f.map(f=>'<div class="field"><label>'+f[0]+'</label><input value="'+(''+f[1]).replace(/"/g,'&quot;')+'"></div>').join('')+'</div>').join('');}
+function openNewTopic(){
+  openModal('<div class="mbox wide"><div class="head" style="margin-bottom:16px"><h3>Post a discussion topic</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div><div class="field"><label>Topic / question <span style="color:var(--bad)">*</span></label><textarea id="topic-txt" placeholder="e.g. What is the best safety practice you follow every day?"></textarea></div><div class="field" style="margin:0"><label>Batch</label><select id="topic-batch">'+CLASSES.map(c=>'<option>'+c.name+'</option>').join('')+'</select></div><div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-newtopic-save>Post topic</button></div></div>');
+}
 function openRemark(i){REMARKIDX=i;const s=MSESSIONS[i];
   openModal('<div class="mbox wide"><div class="head" style="margin-bottom:16px"><h3>Session remark — '+s.student+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div><div class="muted" style="font-size:var(--fs-meta);margin-bottom:12px">'+s.topic+' · '+s.date+'</div><div class="field" style="margin:0"><label>Remark</label><textarea id="remark-txt" placeholder="How did the session go? Notes for the record...">'+(s.remark||'')+'</textarea></div><div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-remark-save>Save remark</button></div></div>');
 }
@@ -1112,6 +1115,8 @@ document.addEventListener('click',e=>{
   const mk=e.target.closest('[data-marksession]');if(mk){const p=mk.dataset.marksession.split(':');MSESSIONS[+p[0]].status=p[1];render('mentor');if(p[1]==='Completed')openRemark(+p[0]);return;}
   const rmk=e.target.closest('[data-remark]');if(rmk){openRemark(+rmk.dataset.remark);return;}
   const ahi=e.target.closest('[data-atthist]');if(ahi){openAttDetail(+ahi.dataset.atthist);return;}
+  if(e.target.closest('[data-newtopic]')){openNewTopic();return;}
+  if(e.target.closest('[data-newtopic-save]')){const t=document.getElementById('topic-txt');const b=document.getElementById('topic-batch');const txt=t?t.value.trim():'';if(txt)TOPICS.unshift({t:txt,batch:b?b.value:'2022-Welder',posts:0,scored:0,by:'You'});closeModal();render('forum');return;}
   if(e.target.closest('[data-remark-save]')){const t=document.getElementById('remark-txt');if(REMARKIDX>=0)MSESSIONS[REMARKIDX].remark=t?t.value.trim():'';closeModal();render('mentor');return;}
   // submissions
   const sb=e.target.closest('[data-subs]');if(sb){openSubsModal(parseInt(sb.dataset.subs,10));return;}
