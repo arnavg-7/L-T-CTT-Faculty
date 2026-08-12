@@ -356,18 +356,18 @@ const CLASSES=[
   {id:'demo',name:'Demo Course',sec:'1',students:1,res:0,act:0,chip:'c-lav',ic:'wifi',att:0,upcoming:true}
 ];
 const STUDENTS=[
-  {id:1109,nm:'Ajaybhai Patel',att:0,score:5.4,merit:2,ses:1,std:'p-bad'},
-  {id:1107,nm:'Bhavesh Nayka',att:0,score:4.8,merit:1,ses:0,std:'p-bad'},
-  {id:1100,nm:'Bhaveshbhai Bamne',att:0,score:6.0,merit:2,ses:1,std:'p-warn'},
-  {id:1111,nm:'Bhavin Halpati',att:100,score:8.7,merit:5,ses:3,std:'p-ok'},
-  {id:1108,nm:'Hardik Rathod',att:100,score:8.2,merit:4,ses:3,std:'p-ok'},
-  {id:1101,nm:'Jaybhai Nayka',att:100,score:7.9,merit:4,ses:2,std:'p-ok'},
-  {id:1094,nm:'Jeelkumar Tandel',att:100,score:8.9,merit:5,ses:3,std:'p-ok'},
-  {id:1099,nm:'Lalubhai Hadal',att:100,score:7.4,merit:3,ses:2,std:'p-ok'},
-  {id:1110,nm:'Manishbhai Nayka',att:100,score:8.1,merit:4,ses:3,std:'p-ok'},
-  {id:1106,nm:'Mayank Rathod',att:100,score:7.6,merit:3,ses:2,std:'p-ok'},
-  {id:1103,nm:'Nileshbhai Tandel',att:64,score:6.6,merit:2,ses:1,std:'p-warn'},
-  {id:1097,nm:'Rakeshbhai Patel',att:42,score:5.9,merit:1,ses:1,std:'p-warn'}
+  {id:1109,nm:'Ajaybhai Patel',att:0,score:5.4,merit:2,ses:1,std:'p-bad',crs:['w2022']},
+  {id:1107,nm:'Bhavesh Nayka',att:0,score:4.8,merit:1,ses:0,std:'p-bad',crs:['w2022']},
+  {id:1100,nm:'Bhaveshbhai Bamne',att:0,score:6.0,merit:2,ses:1,std:'p-warn',crs:['w2022','w2025']},
+  {id:1111,nm:'Bhavin Halpati',att:100,score:8.7,merit:5,ses:3,std:'p-ok',crs:['w2022']},
+  {id:1108,nm:'Hardik Rathod',att:100,score:8.2,merit:4,ses:3,std:'p-ok',crs:['w2022','w2025']},
+  {id:1101,nm:'Jaybhai Nayka',att:100,score:7.9,merit:4,ses:2,std:'p-ok',crs:['w2022']},
+  {id:1094,nm:'Jeelkumar Tandel',att:100,score:8.9,merit:5,ses:3,std:'p-ok',crs:['w2022','demo']},
+  {id:1099,nm:'Lalubhai Hadal',att:100,score:7.4,merit:3,ses:2,std:'p-ok',crs:['w2022']},
+  {id:1110,nm:'Manishbhai Nayka',att:100,score:8.1,merit:4,ses:3,std:'p-ok',crs:['w2022']},
+  {id:1106,nm:'Mayank Rathod',att:100,score:7.6,merit:3,ses:2,std:'p-ok',crs:['w2022','w2025']},
+  {id:1103,nm:'Nileshbhai Tandel',att:64,score:6.6,merit:2,ses:1,std:'p-warn',crs:['w2025']},
+  {id:1097,nm:'Rakeshbhai Patel',att:42,score:5.9,merit:1,ses:1,std:'p-warn',crs:['w2025']}
 ];
 const QUESTIONS=[
   {n:1,q:'Which PPE is mandatory before striking an arc?',type:'Multiple choice',marks:5},
@@ -497,18 +497,19 @@ V.home=()=>`
 
 V.students=()=>{
   const c=CLASSES.find(x=>x.id===CURCLASS)||CLASSES[0];
+  const roster=STUDENTS.filter(s=>s.crs.includes(CURCLASS));
   return `
 <div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-  <div style="font-weight:600">Your class</div>
+  <div style="font-weight:600">Course</div>
   <div class="seg" data-classseg>${CLASSES.map(x=>`<button data-class="${x.id}" class="${x.id===CURCLASS?'active':''}">${x.name}</button>`).join('')}</div>
-  <div class="muted" style="font-size:var(--fs-meta);margin-left:auto">Section ${c.sec} · ${c.name==='Demo Course'?'1':STUDENTS.length} students</div>
+  <div class="muted" style="font-size:var(--fs-meta);margin-left:auto">Section ${c.sec||'—'} · ${roster.length} student${roster.length===1?'':'s'}</div>
 </div>
 <div class="card">
-  <div class="head"><h3>My students</h3><div class="search" style="width:230px">${ic('search')}<input placeholder="${STUDENTS.length} records..." data-search></div></div>
-  <div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Name</th><th>Registration ID</th><th>Email</th><th>Attendance</th><th>Avg score</th><th>Standing</th></tr></thead><tbody>
-  ${STUDENTS.map(s=>{const em=s.nm.toLowerCase().replace(/ /g,'.').replace(/[^a-z.]/g,'')+'.'+s.id+'@ltpct.local';const ac=s.att>=75?'var(--ok)':s.att>=50?'var(--warn)':'var(--bad)';
+  <div class="head"><h3>Students in ${c.name}</h3><div class="search" style="width:230px">${ic('search')}<input placeholder="${roster.length} records..." data-search></div></div>
+  ${roster.length?`<div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Name</th><th>Registration ID</th><th>Email</th><th>Attendance</th><th>Avg score</th><th>Standing</th></tr></thead><tbody>
+  ${roster.map(s=>{const em=s.nm.toLowerCase().replace(/ /g,'.').replace(/[^a-z.]/g,'')+'.'+s.id+'@ltpct.local';const ac=s.att>=75?'var(--ok)':s.att>=50?'var(--warn)':'var(--bad)';
     return `<tr data-goto="student" data-sid="${s.id}" data-back="students"><td class="nm"><div style="display:flex;align-items:center;gap:12px"><span class="ava">${initials(s.nm)}</span>${s.nm}</div></td><td>${s.id}</td><td>${em}</td><td><b style="color:${ac}">${s.att}%</b></td><td>${s.score.toFixed(1)}</td><td>${pill(s.std,s.std==='p-ok'?'On track':s.std==='p-warn'?'Watch':'At risk')}</td></tr>`;}).join('')}
-  </tbody></table></div>
+  </tbody></table></div>`:'<div class="muted" style="padding:18px 0;text-align:center">No students enrolled in this course yet.</div>'}
 </div>`;};
 
 V.student=()=>{
@@ -562,7 +563,8 @@ function renderContentItems(items){
 }
 function renderCourseContent(){const el=document.getElementById('cc-list');if(el)el.innerHTML=renderContentItems(CONTENT[CURCLASS]||[]);}
 function courseStudents(c){
-  const list=c.id==='demo'?STUDENTS.slice(0,1):STUDENTS;
+  const list=STUDENTS.filter(s=>s.crs.includes(c.id));
+  if(!list.length)return '<div class="muted" style="padding:18px 0;text-align:center">No students enrolled in this course yet.</div>';
   return '<div class="head"><h3>Enrolled students</h3><div class="search" style="width:220px">'+ic('search')+'<input placeholder="'+list.length+' students..." data-search></div></div>'+
     '<div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Name</th><th>Reg ID</th><th>Attendance</th><th>Avg score</th><th></th></tr></thead><tbody>'+
     list.map(s=>{const ac=s.att>=75?'var(--ok)':s.att>=50?'var(--warn)':'var(--bad)';
@@ -711,6 +713,13 @@ V.assess=()=>`
 <div class="card">
   <div class="tabs" data-tabs="asx"><button class="active" data-p="tests">MCQ tests</button><button data-p="results">Results & scoring</button></div>
   <div data-body="tests">
+    <div class="head" style="flex-wrap:wrap;gap:10px"><h3>MCQ tests</h3>
+      <div style="display:flex;gap:10px;margin-left:auto;flex-wrap:wrap;align-items:center">
+        <div class="field" style="margin:0;min-width:180px"><select data-testfilter><option value="">All courses</option>${CLASSES.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join('')}</select></div>
+        <button class="btn btn-p btn-sm" data-newtest data-back="assess" id="tests-create">${ic('plus')} Create test</button>
+      </div>
+    </div>
+    <div class="muted" style="font-size:var(--fs-meta);margin-bottom:10px">Filter by course, or select a test to view its questions.</div>
     <div id="tests-body"></div>
   </div>
   <div data-body="results" style="display:none">
@@ -922,17 +931,11 @@ function profEditForm(D,tab){return D[tab].map(s=>'<div class="sec-h" style="mar
 function openRemark(i){REMARKIDX=i;const s=MSESSIONS[i];
   openModal('<div class="mbox wide"><div class="head" style="margin-bottom:16px"><h3>Session remark — '+s.student+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div><div class="muted" style="font-size:var(--fs-meta);margin-bottom:12px">'+s.topic+' · '+s.date+'</div><div class="field" style="margin:0"><label>Remark</label><textarea id="remark-txt" placeholder="How did the session go? Notes for the record...">'+(s.remark||'')+'</textarea></div><div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-remark-save>Save remark</button></div></div>');
 }
-function testCourseCard(c){const n=TESTS.filter(t=>t.batch===c.name).length;
-  return '<div class="clscard" data-test-course="'+c.id+'"><div class="cc-top">'+chip(c.chip,c.ic)+'<div class="cc-h"><div class="cc-nm">'+c.name+'</div><div class="cc-sub">Section '+(c.sec||'—')+' · '+c.students+' student'+(c.students===1?'':'s')+'</div></div><span class="cc-arr">'+ic('arr')+'</span></div><div class="cc-foot"><span>'+ic('clip')+'<b>'+n+'</b> MCQ tests</span><span>'+ic('users')+'<b>'+c.students+'</b> learners</span></div></div>';
-}
 function renderTests(){
   const el=document.getElementById('tests-body');if(!el)return;
-  if(!TESTCOURSE){el.innerHTML='<div class="muted" style="font-size:var(--fs-meta);margin-bottom:16px">Select a course to view or create its MCQ tests.</div><div class="grid g3">'+CLASSES.map(testCourseCard).join('')+'</div>';return;}
-  const c=CLASSES.find(x=>x.id===TESTCOURSE)||CLASSES[0];
-  const tests=TESTS.map((t,i)=>({t,i})).filter(x=>x.t.batch===c.name);
-  el.innerHTML='<a class="link" data-test-back style="margin-bottom:14px;display:inline-flex">'+ic('arrl')+' All courses</a>'+
-    '<div class="head"><h3>'+c.name+' · MCQ tests</h3><button class="btn btn-p btn-sm" data-newtest data-back="assess" data-course="'+c.name+'">'+ic('plus')+' Create test</button></div>'+
-    (tests.length?'<div class="scroll-x"><table class="tbl"><thead><tr><th>Test</th><th>Questions</th><th>Marks</th><th>Window</th><th>Attempts</th><th>Status</th></tr></thead><tbody>'+tests.map(x=>'<tr data-goto="testview" data-tid="'+x.i+'" data-back="assess"><td class="nm">'+x.t.nm+'</td><td>'+x.t.qs+'</td><td>'+x.t.marks+'</td><td>'+x.t.win+'</td><td>'+x.t.attempts+'</td><td>'+pill(x.t.status==='Published'?'p-ok':'p-neu',x.t.status)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="muted" style="padding:16px 0">No MCQ tests for this course yet — create one.</div>');
+  const tests=TESTS.map((t,i)=>({t,i})).filter(x=>!TESTFILTER||x.t.batch===TESTFILTER);
+  el.innerHTML=tests.length?'<div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Test</th><th>Course</th><th>Questions</th><th>Marks</th><th>Window</th><th>Attempts</th><th>Status</th></tr></thead><tbody>'+
+    tests.map(x=>'<tr data-goto="testview" data-tid="'+x.i+'" data-back="assess"><td class="nm">'+x.t.nm+'</td><td>'+x.t.batch+'</td><td>'+x.t.qs+'</td><td>'+x.t.marks+'</td><td>'+x.t.win+'</td><td>'+x.t.attempts+'</td><td>'+pill(x.t.status==='Published'?'p-ok':'p-neu',x.t.status)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="muted" style="padding:18px 0;text-align:center">No MCQ tests'+(TESTFILTER?' for '+TESTFILTER:'')+' yet — create one.</div>';
 }
 function scheduleForm(nm){const link='meet.ctt/'+Math.random().toString(36).slice(2,6)+'-'+Math.random().toString(36).slice(2,6);
   return '<div class="rowf"><div class="field"><label>Mentee <span style="color:var(--bad)">*</span></label><select>'+MENTEES.map(m=>'<option'+(m.nm===nm?' selected':'')+'>'+m.nm+'</option>').join('')+'</select></div><div class="field"><label>Topic</label><input placeholder="e.g. Weld symbol reading"></div></div>'+
@@ -977,7 +980,7 @@ const T={
   casedetail:['Case Details','Raise a Case › Case']
 };
 const NAVMAP={student:'students',markatt:'attend',testview:'assess',testnew:'assess',casedetail:'raise',course:'courses'};
-let SELTEST=0,TESTQ=[],TQEDIT=-1,SELCASE='4821',BACKTO='students',CEDIT=-1,SUBTEST=0,RESCOURSE=null,TESTCOURSE=null,TB_COURSE='',REMARKIDX=-1;
+let SELTEST=0,TESTQ=[],TQEDIT=-1,SELCASE='4821',BACKTO='students',CEDIT=-1,SUBTEST=0,RESCOURSE=null,TESTFILTER='',TB_COURSE='',REMARKIDX=-1;
 
 const nav=document.getElementById('nav');
 function navLink(id,i,l){const a=document.createElement('a');a.dataset.goto=id;a.innerHTML=ic(i)+'<span>'+l+'</span>';return a;}
@@ -1006,7 +1009,7 @@ function render(id){
   document.getElementById('pg-crumb').textContent=(T[id]||['',''])[1];
   if(id==='timetable')cal();
   if(id==='testnew')renderTestQ();
-  if(id==='assess'){RESCOURSE=null;TESTCOURSE=null;renderResults();renderTests();}
+  if(id==='assess'){RESCOURSE=null;TESTFILTER='';renderResults();renderTests();}
   scrollTo(0,0);
 }
 
@@ -1077,8 +1080,6 @@ document.addEventListener('click',e=>{
   // results & scoring by course
   const rc=e.target.closest('[data-res-course]');if(rc){RESCOURSE=rc.dataset.resCourse;renderResults();return;}
   if(e.target.closest('[data-res-back]')){RESCOURSE=null;renderResults();return;}
-  const tc=e.target.closest('[data-test-course]');if(tc){TESTCOURSE=tc.dataset.testCourse;renderTests();return;}
-  if(e.target.closest('[data-test-back]')){TESTCOURSE=null;renderTests();return;}
   const pm=e.target.closest('[data-publishmarks]');if(pm){const nm=pm.dataset.publishmarks;confirmModal('c-green','check','Publish marks','Publish the marks for <b>'+nm+'</b> to the learner records? They become visible to students and roll up in reports.','Publish',()=>toast('c-green','check','Marks published','Marks for '+nm+' are now published.'));return;}
   const mk=e.target.closest('[data-marksession]');if(mk){const p=mk.dataset.marksession.split(':');MSESSIONS[+p[0]].status=p[1];render('mentor');if(p[1]==='Completed')openRemark(+p[0]);return;}
   const rmk=e.target.closest('[data-remark]');if(rmk){openRemark(+rmk.dataset.remark);return;}
@@ -1136,6 +1137,11 @@ document.addEventListener('click',e=>{
   const st=e.target.closest('[data-stars] svg');if(st){const wrap=st.closest('[data-stars]');const kids=[...wrap.children];const idx=kids.indexOf(st);kids.forEach((k,i)=>k.classList.toggle('on',i<=idx));const lbl=wrap.parentElement.querySelector('.muted');if(lbl&&/Merit/.test(lbl.textContent))lbl.textContent='Merit '+(idx+1)+'/5';return;}
 });
 
+/* assessment course filter */
+document.addEventListener('change',e=>{
+  const tf=e.target.closest('[data-testfilter]');
+  if(tf){TESTFILTER=tf.value;const cb=document.getElementById('tests-create');if(cb)cb.dataset.course=TESTFILTER;renderTests();}
+});
 /* live search */
 document.addEventListener('input',e=>{
   const s=e.target.closest('[data-search]');if(!s)return;
