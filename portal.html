@@ -786,9 +786,14 @@ V.attend=()=>`
     </tbody></table></div>
   </div>
   <div data-body="hist" style="display:none">
-    <div class="scroll-x"><table class="tbl"><thead><tr><th>Date</th><th>Session</th><th>Present</th><th>Absent</th><th>Rate</th></tr></thead><tbody>
-    ${[['2026-07-21','Welder — Lecture',38,4,90],['2026-07-19','Welder — Practical',36,6,86],['2026-07-17','Welder — Theory',40,2,95]].map(r=>`<tr><td class="nm">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td><b style="color:${r[4]>=75?'var(--ok)':'var(--warn)'}">${r[4]}%</b></td></tr>`).join('')}
-    </tbody></table></div>
+    <div class="head" style="flex-wrap:wrap;gap:10px"><h3>Attendance history</h3>
+      <div style="display:flex;gap:12px;margin-left:auto;flex-wrap:wrap;align-items:flex-end">
+        <div class="field" style="margin:0;min-width:170px"><label>Course</label><select data-attcourse><option value="">All courses</option>${CLASSES.map(c=>'<option>'+c.name+'</option>').join('')}</select></div>
+        <div class="field" style="margin:0"><label>Date</label><input type="date" data-attdate></div>
+      </div>
+    </div>
+    <div class="muted" style="font-size:var(--fs-meta);margin-bottom:10px">Select a record to view the attendance marked for each student.</div>
+    <div id="atthist-body"></div>
   </div>
 </div>`;
 
@@ -931,6 +936,28 @@ function profEditForm(D,tab){return D[tab].map(s=>'<div class="sec-h" style="mar
 function openRemark(i){REMARKIDX=i;const s=MSESSIONS[i];
   openModal('<div class="mbox wide"><div class="head" style="margin-bottom:16px"><h3>Session remark — '+s.student+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div><div class="muted" style="font-size:var(--fs-meta);margin-bottom:12px">'+s.topic+' · '+s.date+'</div><div class="field" style="margin:0"><label>Remark</label><textarea id="remark-txt" placeholder="How did the session go? Notes for the record...">'+(s.remark||'')+'</textarea></div><div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-remark-save>Save remark</button></div></div>');
 }
+const ATTHIST=[
+  {date:'2026-08-10',course:'2022-Welder',session:'Welder — Lecture'},
+  {date:'2026-08-08',course:'2022-Welder',session:'Welder — Practical'},
+  {date:'2026-08-05',course:'2022-Welder',session:'Welder — Theory'},
+  {date:'2026-08-09',course:'2025-Welder',session:'Welder — Lecture'},
+  {date:'2026-08-06',course:'2025-Welder',session:'Welder — Practical'},
+  {date:'2026-08-03',course:'2022-Welder',session:'Welder — Inspection'}
+];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtDate(d){const p=d.split('-');return p[2]+' '+MON[+p[1]-1]+' '+p[0];}
+function attMarks(i){const h=ATTHIST[i];const cid=(CLASSES.find(c=>c.name===h.course)||{}).id;
+  return STUDENTS.filter(s=>s.crs.includes(cid)).map(s=>[s,((s.id+i*3)%6===0)?'Absent':'Present']);}
+function renderAttHist(){
+  const el=document.getElementById('atthist-body');if(!el)return;
+  const rows=ATTHIST.map((h,i)=>({h,i})).filter(x=>(!ATTCOURSE||x.h.course===ATTCOURSE)&&(!ATTDATE||x.h.date===ATTDATE));
+  el.innerHTML=rows.length?'<div class="scroll-x"><table class="tbl"><thead><tr><th>Date</th><th>Course</th><th>Session</th><th>Present</th><th>Absent</th><th></th></tr></thead><tbody>'+
+    rows.map(x=>{const m=attMarks(x.i);const pres=m.filter(a=>a[1]==='Present').length;
+      return '<tr data-atthist="'+x.i+'" style="cursor:pointer"><td class="nm">'+fmtDate(x.h.date)+'</td><td>'+x.h.course+'</td><td>'+x.h.session+'</td><td><b style="color:var(--ok)">'+pres+'</b></td><td><b style="color:var(--bad)">'+(m.length-pres)+'</b></td><td style="text-align:right"><span class="link">View '+ic('arr')+'</span></td></tr>';}).join('')+'</tbody></table></div>':'<div class="muted" style="padding:18px 0;text-align:center">No attendance records'+(ATTCOURSE?' for '+ATTCOURSE:'')+(ATTDATE?' on '+fmtDate(ATTDATE):'')+'.</div>';
+}
+function openAttDetail(i){const h=ATTHIST[i];const m=attMarks(i);const pres=m.filter(a=>a[1]==='Present').length;
+  openModal('<div class="mbox wide"><div class="head" style="margin-bottom:12px"><h3>'+h.session+' · '+fmtDate(h.date)+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div><div class="muted" style="font-size:var(--fs-meta);margin-bottom:14px">'+h.course+' · '+pres+' present · '+(m.length-pres)+' absent</div><div class="scroll-x" style="max-height:56vh;overflow:auto"><table class="tbl"><thead><tr><th>Student</th><th>Reg ID</th><th>Attendance</th></tr></thead><tbody>'+m.map(a=>'<tr><td class="nm">'+a[0].nm+'</td><td>'+a[0].id+'</td><td>'+(a[1]==='Present'?pill('p-ok','Present'):pill('p-bad','Absent'))+'</td></tr>').join('')+'</tbody></table></div><div class="mbtns"><button class="btn btn-o" data-mclose>Close</button></div></div>');
+}
 function renderTests(){
   const el=document.getElementById('tests-body');if(!el)return;
   const tests=TESTS.map((t,i)=>({t,i})).filter(x=>!TESTFILTER||x.t.batch===TESTFILTER);
@@ -980,7 +1007,7 @@ const T={
   casedetail:['Case Details','Raise a Case › Case']
 };
 const NAVMAP={student:'students',markatt:'attend',testview:'assess',testnew:'assess',casedetail:'raise',course:'courses'};
-let SELTEST=0,TESTQ=[],TQEDIT=-1,SELCASE='4821',BACKTO='students',CEDIT=-1,SUBTEST=0,RESCOURSE=null,TESTFILTER='',TB_COURSE='',REMARKIDX=-1;
+let SELTEST=0,TESTQ=[],TQEDIT=-1,SELCASE='4821',BACKTO='students',CEDIT=-1,SUBTEST=0,RESCOURSE=null,TESTFILTER='',TB_COURSE='',REMARKIDX=-1,ATTCOURSE='',ATTDATE='';
 
 const nav=document.getElementById('nav');
 function navLink(id,i,l){const a=document.createElement('a');a.dataset.goto=id;a.innerHTML=ic(i)+'<span>'+l+'</span>';return a;}
@@ -1010,6 +1037,7 @@ function render(id){
   if(id==='timetable')cal();
   if(id==='testnew')renderTestQ();
   if(id==='assess'){RESCOURSE=null;TESTFILTER='';renderResults();renderTests();}
+  if(id==='attend'){ATTCOURSE='';ATTDATE='';renderAttHist();}
   scrollTo(0,0);
 }
 
@@ -1083,6 +1111,7 @@ document.addEventListener('click',e=>{
   const pm=e.target.closest('[data-publishmarks]');if(pm){const nm=pm.dataset.publishmarks;confirmModal('c-green','check','Publish marks','Publish the marks for <b>'+nm+'</b> to the learner records? They become visible to students and roll up in reports.','Publish',()=>toast('c-green','check','Marks published','Marks for '+nm+' are now published.'));return;}
   const mk=e.target.closest('[data-marksession]');if(mk){const p=mk.dataset.marksession.split(':');MSESSIONS[+p[0]].status=p[1];render('mentor');if(p[1]==='Completed')openRemark(+p[0]);return;}
   const rmk=e.target.closest('[data-remark]');if(rmk){openRemark(+rmk.dataset.remark);return;}
+  const ahi=e.target.closest('[data-atthist]');if(ahi){openAttDetail(+ahi.dataset.atthist);return;}
   if(e.target.closest('[data-remark-save]')){const t=document.getElementById('remark-txt');if(REMARKIDX>=0)MSESSIONS[REMARKIDX].remark=t?t.value.trim():'';closeModal();render('mentor');return;}
   // submissions
   const sb=e.target.closest('[data-subs]');if(sb){openSubsModal(parseInt(sb.dataset.subs,10));return;}
@@ -1140,7 +1169,9 @@ document.addEventListener('click',e=>{
 /* assessment course filter */
 document.addEventListener('change',e=>{
   const tf=e.target.closest('[data-testfilter]');
-  if(tf){TESTFILTER=tf.value;const cb=document.getElementById('tests-create');if(cb)cb.dataset.course=TESTFILTER;renderTests();}
+  if(tf){TESTFILTER=tf.value;const cb=document.getElementById('tests-create');if(cb)cb.dataset.course=TESTFILTER;renderTests();return;}
+  const ac=e.target.closest('[data-attcourse]');if(ac){ATTCOURSE=ac.value;renderAttHist();return;}
+  const ad=e.target.closest('[data-attdate]');if(ad){ATTDATE=ad.value;renderAttHist();return;}
 });
 /* live search */
 document.addEventListener('input',e=>{
