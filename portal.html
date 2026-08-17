@@ -473,6 +473,7 @@ function lrow(nm,mt,right){return '<div class="lrow"><div style="flex:1"><div cl
 function tclass(time,name,loc,col){return '<div style="display:flex;align-items:center;gap:16px;padding:14px 16px;background:var(--soft);border-left:3px solid '+col+';border-radius:10px;margin-bottom:10px"><div class="time" style="width:120px">'+time+'</div><div style="flex:1;min-width:0"><div style="font-weight:600">'+name+'</div><div class="muted" style="font-size:var(--fs-meta);margin-top:2px">'+loc+'</div></div></div>';}
 function stars(n){var s='';for(var i=1;i<=5;i++){s+='<svg class="'+(i<=n?'on':'')+'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="'+ICONS.star+'"/></svg>';}return '<span class="star" data-stars>'+s+'</span>';}
 function rateStars(ti,ri,n){var s='';for(var i=1;i<=5;i++){s+='<svg class="'+(i<=n?'on':'')+'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="'+ICONS.star+'"/></svg>';}return '<span class="star" data-rate="'+ti+'-'+ri+'" title="Rate this reply">'+s+'</span>';}
+function starsRO(n){var s='';for(var i=1;i<=5;i++){s+='<svg class="'+(i<=n?'on':'')+'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="'+ICONS.star+'"/></svg>';}return '<span class="star">'+s+'</span>';}
 function acc(open,head,body){return '<div class="acc'+(open?' open':'')+'"><div class="acc-h">'+head+ic('cv','cv')+'</div><div class="acc-b">'+body+'</div></div>';}
 function resRow(i,col,nm,tot,pub){return '<div class="acc"><div class="acc-h">'+chip(col,i)+'<span class="t">'+nm+'</span><span class="cnt">Total '+tot+' · Published '+pub+'</span>'+ic('cv','cv')+'</div><div class="acc-b"><div class="muted" style="padding:6px 0">No items yet in this batch. Use <b>+ Resource</b> to add '+nm.toLowerCase()+'.</div></div></div>';}
 
@@ -528,6 +529,8 @@ V.student=()=>{
   const em=s.nm.toLowerCase().replace(/ /g,'.').replace(/[^a-z.]/g,'')+'.'+s.id+'@ltpct.local';
   const ac=s.att>=75?'var(--ok)':s.att>=50?'var(--warn)':'var(--bad)';
   const scoreRows=[['Safety & PPE MCQ','Multiple choice','36 / 40','p-ok','Passed'],['Weld Symbols Quiz','Multiple choice','40 / 48','p-ok','Passed'],['Arc Welding Fundamentals','Multiple choice','—','p-neu','Not attempted']];
+  const forumLog=[];TOPICS.forEach(t=>t.replies.forEach(r=>{if(r.nm===s.nm)forumLog.push({topic:t.t,batch:t.batch,text:r.mt,rating:r.rating});}));
+  const forumRated=forumLog.filter(f=>f.rating>0);
   return `
 <a class="link" data-goto="${BACKTO==='course'?'course':'students'}" style="margin-bottom:16px">${ic('arrl')} Back to ${BACKTO==='course'?'course':'my students'}</a>
 <div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
@@ -551,8 +554,7 @@ V.student=()=>{
     ${s.ses>0?SESLOG.filter(x=>x[1]===s.nm).concat(s.ses>1?[['12 May 2026',s.nm,'Introductory mentoring session and goal setting','Present']]:[]).map(x=>lrow(x[0],x[2],pill('p-ok',x[3]))).join('')||lrow('No sessions in current view','Earlier sessions accumulate in the longitudinal profile',pill('p-neu','—')):'<div class="muted" style="padding:8px 0">No mentoring sessions logged yet. Use Mentoring → Log session.</div>'}
   </div>
   <div data-body="frm" style="display:none">
-    ${lrow('Common causes of weld defects','Scored contribution',stars(s.merit))}
-    ${lrow('Best safety practice you follow','Scored contribution',stars(Math.max(1,s.merit-1)))}
+    ${forumLog.length?`<div class="infobox">${ic('info')}<div class="im"><b>Discussion-forum history.</b> Every reply ${s.nm.split(' ')[0]} posted, with the merit you awarded from the forum — ${forumRated.length} of ${forumLog.length} rated. This engagement rolls up into their Forum merit.</div></div>`+forumLog.map(f=>`<div class="lrow"><span class="chip c-green" style="width:38px;height:38px;border-radius:10px">${ic('chat')}</span><div style="flex:1;min-width:0"><div class="nm">${f.topic}</div><div class="mt" style="line-height:1.5">“${f.text}”</div><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">${f.batch}</div></div><div style="text-align:right;flex:none">${starsRO(f.rating)}<div class="muted" style="font-size:var(--fs-meta);margin-top:4px">${f.rating?'Merit '+f.rating+'/5':'Not yet rated'}</div></div></div>`).join(''):'<div class="muted" style="padding:18px 0;text-align:center">No discussion-forum contributions from this learner yet.</div>'}
   </div>
 </div>`;};
 
@@ -593,6 +595,14 @@ function courseAssess(c){
       '<td style="text-align:right;white-space:nowrap"><button class="btn btn-o btn-sm" data-subs="'+i+'">'+ic('users')+' Submissions</button> <button class="btn btn-o btn-sm" data-edittest="'+i+'" data-back="course">'+ic('edit')+' Edit</button></td></tr>').join('')+
     '</tbody></table></div>':'<div class="muted" style="padding:20px 0;text-align:center">No assessments yet for this course.</div>';
   return '<div class="head"><h3>Assessments</h3><button class="btn btn-p btn-sm" data-newtest data-back="course" data-course="'+c.name+'">'+ic('plus')+' Create assessment</button></div>'+body;
+}
+function courseDiscussions(c){
+  const items=TOPICS.map((t,i)=>({t,i})).filter(o=>o.t.batch===c.name);
+  const head='<div class="head"><h3>Discussion forum</h3>'+(items.length?'<span class="muted" style="font-size:var(--fs-meta)">'+items.length+' discussion'+(items.length===1?'':'s')+' · select one to open it in the forum</span>':'')+'</div>';
+  if(!items.length)return head+'<div class="muted" style="padding:20px 0;text-align:center">No discussions for this course yet. Post one from the <b>Discussion Forum</b> module.</div>';
+  return head+items.map(({t,i})=>{const ps=tposts(t),sc=tscored(t);
+    return '<div class="lrow" data-goto-topic="'+i+'" style="cursor:pointer'+(t.closed?';opacity:.68':'')+'"><span class="chip c-green" style="width:38px;height:38px;border-radius:10px">'+ic('chat')+'</span><div style="flex:1;min-width:0"><div class="nm">'+t.t+'</div><div class="mt">'+ps+' response'+(ps===1?'':'s')+' · created by '+t.by+'</div></div>'+(t.closed?'<span class="pill" style="background:var(--line);color:var(--muted)">Closed</span>':(sc===ps&&ps>0?pill('p-ok','All rated'):pill('p-warn',(ps-sc)+' to rate')))+'<span class="link" style="flex:none">'+ic('arr')+'</span></div>';
+  }).join('');
 }
 V.courses=()=>`
 <div class="card">
@@ -643,10 +653,12 @@ V.course=()=>{
     <button class="active" data-p="students">Students</button>
     <button data-p="content">Course Content</button>
     <button data-p="assess">Assessments</button>
+    <button data-p="disc">Discussion Forum</button>
   </div>
   <div data-body="students">${courseStudents(c)}</div>
   <div data-body="content" style="display:none">${courseContent(c)}</div>
   <div data-body="assess" style="display:none">${courseAssess(c)}</div>
+  <div data-body="disc" style="display:none">${courseDiscussions(c)}</div>
 </div>`;
 };
 function openContentModal(idx){
@@ -1173,6 +1185,7 @@ document.addEventListener('click',e=>{
   const raise=e.target.closest('[data-raise]');if(raise){toast('c-green','check','Case submitted','Your case has been raised. The support desk will respond by email.');return;}
   const sub=e.target.closest('[data-submit-att]');if(sub){confirmModal('c-green','check','Submit attendance','Submit attendance for <b>2022-Welder · 23 Jul</b>?','Submit',()=>{render('attend');});return;}
 
+  const gt=e.target.closest('[data-goto-topic]');if(gt){SELTOPIC=+gt.dataset.gotoTopic;render('forum');const el=document.getElementById('tresp');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});return;}
   const row=e.target.closest('[data-goto]');
   if(row){e.preventDefault();if(row.dataset.sid)SELSTU=parseInt(row.dataset.sid,10);if(row.dataset.tid)SELTEST=parseInt(row.dataset.tid,10);if(row.dataset.cid)SELCASE=row.dataset.cid;if(row.dataset.back)BACKTO=row.dataset.back;render(row.dataset.goto);return;}
 
