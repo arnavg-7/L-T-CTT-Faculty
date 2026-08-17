@@ -114,6 +114,7 @@
   .stat .k{font-size:var(--fs-meta);color:var(--muted);margin-top:5px}
 
   .lrow{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .lrow.sel{background:var(--soft);border-radius:10px;box-shadow:inset 3px 0 0 var(--primary);padding-left:12px;padding-right:12px;border-bottom-color:transparent}
   .lrow:last-child{border:none;padding-bottom:0}
   .lrow:first-child{padding-top:0}
   .lrow .nm{font-weight:600}
@@ -423,17 +424,26 @@ const MSESSIONS=[
   {student:'Rakeshbhai Patel',date:'28 Jul 2026',time:'03:00 PM',topic:'Attendance concern',status:'Missed',remark:''}
 ];
 const TOPICS=[
-  {t:'Common causes of weld defects — share what you have seen',batch:'2022-Welder',posts:14,scored:9,by:'You',closed:false},
-  {t:'Best safety practice you follow every day',batch:'2022-Welder',posts:9,scored:9,by:'You',closed:false},
-  {t:'MIG vs TIG — when would you pick each?',batch:'2025-Welder',posts:6,scored:0,by:'You',closed:false}
+  {t:'Common causes of weld defects — share what you have seen',batch:'2022-Welder',by:'You',closed:false,replies:[
+    {nm:'Jeelkumar Tandel',mt:'Lack of shielding gas coverage causes porosity — I keep the nozzle close and check the flow meter before every run.',rating:5},
+    {nm:'Bhavin Halpati',mt:'Dirty or rusty base metal is the biggest one in our shop. We grind and wipe the joint first.',rating:4},
+    {nm:'Hardik Rathod',mt:'Too much travel speed gives undercut. Slowing down fixed it for me.',rating:4},
+    {nm:'Lalubhai Hadal',mt:'Moisture on electrodes. We store them in the oven now.',rating:3},
+    {nm:'Ajaybhai Patel',mt:'defects happen',rating:0}
+  ]},
+  {t:'Best safety practice you follow every day',batch:'2022-Welder',by:'You',closed:false,replies:[
+    {nm:'Hardik Rathod',mt:'Always check the helmet shade before striking an arc.',rating:5},
+    {nm:'Mehul Chauhan',mt:'PPE first — gloves, apron and boots on before I even light up.',rating:4},
+    {nm:'Bhavin Halpati',mt:'I clear my work area of anything flammable at the start of every shift.',rating:0}
+  ]},
+  {t:'MIG vs TIG — when would you pick each?',batch:'2025-Welder',by:'You',closed:false,replies:[
+    {nm:'Bhavin Halpati',mt:'TIG for thin stainless where I need clean, precise welds.',rating:0},
+    {nm:'Ajaybhai Patel',mt:'MIG for thicker mild steel and speed on production jobs.',rating:0}
+  ]}
 ];
-const POSTS=[
-  {nm:'Jeelkumar Tandel',mt:'Lack of shielding gas coverage causes porosity — I keep the nozzle close and check the flow meter before every run.',stars:5},
-  {nm:'Bhavin Halpati',mt:'Dirty or rusty base metal is the biggest one in our shop. We grind and wipe the joint first.',stars:4},
-  {nm:'Hardik Rathod',mt:'Too much travel speed gives undercut. Slowing down fixed it for me.',stars:4},
-  {nm:'Lalubhai Hadal',mt:'Moisture on electrodes. We store them in the oven now.',stars:3},
-  {nm:'Ajaybhai Patel',mt:'defects happen',stars:1}
-];
+let SELTOPIC=0;
+function tposts(t){return t.replies.length;}
+function tscored(t){return t.replies.filter(r=>r.rating>0).length;}
 const TODAY=[
   ['09:00 – 10:00','Welder — Lecture','2022-Welder · Section A · Room 4','var(--chip-green-i)'],
   ['11:00 – 12:30','Welder — Practical','Workshop 2 · 2022-Welder','var(--chip-green-i)'],
@@ -462,6 +472,7 @@ function clsCard(c){
 function lrow(nm,mt,right){return '<div class="lrow"><div style="flex:1"><div class="nm">'+nm+'</div><div class="mt">'+mt+'</div></div>'+right+'</div>';}
 function tclass(time,name,loc,col){return '<div style="display:flex;align-items:center;gap:16px;padding:14px 16px;background:var(--soft);border-left:3px solid '+col+';border-radius:10px;margin-bottom:10px"><div class="time" style="width:120px">'+time+'</div><div style="flex:1;min-width:0"><div style="font-weight:600">'+name+'</div><div class="muted" style="font-size:var(--fs-meta);margin-top:2px">'+loc+'</div></div></div>';}
 function stars(n){var s='';for(var i=1;i<=5;i++){s+='<svg class="'+(i<=n?'on':'')+'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="'+ICONS.star+'"/></svg>';}return '<span class="star" data-stars>'+s+'</span>';}
+function rateStars(ti,ri,n){var s='';for(var i=1;i<=5;i++){s+='<svg class="'+(i<=n?'on':'')+'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="'+ICONS.star+'"/></svg>';}return '<span class="star" data-rate="'+ti+'-'+ri+'" title="Rate this reply">'+s+'</span>';}
 function acc(open,head,body){return '<div class="acc'+(open?' open':'')+'"><div class="acc-h">'+head+ic('cv','cv')+'</div><div class="acc-b">'+body+'</div></div>';}
 function resRow(i,col,nm,tot,pub){return '<div class="acc"><div class="acc-h">'+chip(col,i)+'<span class="t">'+nm+'</span><span class="cnt">Total '+tot+' · Published '+pub+'</span>'+ic('cv','cv')+'</div><div class="acc-b"><div class="muted" style="padding:6px 0">No items yet in this batch. Use <b>+ Resource</b> to add '+nm.toLowerCase()+'.</div></div></div>';}
 
@@ -841,16 +852,20 @@ V.mentor=()=>{
 </div>`;
 };
 
-V.forum=()=>`
+V.forum=()=>{
+  if(SELTOPIC>=TOPICS.length)SELTOPIC=0;
+  const st=TOPICS[SELTOPIC]||TOPICS[0];const sscored=tscored(st);const sposts=tposts(st);
+  return `
 <div class="card" style="margin-bottom:20px">
   <div class="head"><h3>Discussion topics</h3><button class="btn btn-p btn-sm" data-newtopic>${ic('plus')} Post topic</button></div>
-  ${TOPICS.map((t,i)=>`<div class="lrow" data-open-topic="${i}" style="cursor:pointer${t.closed?';opacity:.68':''}"><span class="chip c-green" style="width:36px;height:36px;border-radius:10px">${ic('chat')}</span><div style="flex:1"><div class="nm">${t.t}</div><div class="mt">${t.batch} · ${t.posts} posts · created by ${t.by}</div></div>${t.closed?'<span class="pill" style="background:var(--line);color:var(--muted)">Closed</span>':(t.scored===t.posts?pill('p-ok','All scored'):pill('p-warn',(t.posts-t.scored)+' to score'))}${t.closed?`<button class="btn btn-o btn-sm" data-reopentopic="${i}">Reopen</button>`:`<button class="btn btn-o btn-sm" data-closetopic="${i}">${ic('x')} Close</button>`}</div>`).join('')}
+  ${TOPICS.map((t,i)=>{const sc=tscored(t),ps=tposts(t);return `<div class="lrow${i===SELTOPIC?' sel':''}" data-open-topic="${i}" style="cursor:pointer${t.closed?';opacity:.68':''}"><span class="chip c-green" style="width:36px;height:36px;border-radius:10px">${ic('chat')}</span><div style="flex:1"><div class="nm">${t.t}</div><div class="mt">${t.batch} · ${ps} response${ps===1?'':'s'} · created by ${t.by}</div></div>${t.closed?'<span class="pill" style="background:var(--line);color:var(--muted)">Closed</span>':(sc===ps&&ps>0?pill('p-ok','All rated'):pill('p-warn',(ps-sc)+' to rate'))}${t.closed?`<button class="btn btn-o btn-sm" data-reopentopic="${i}">Reopen</button>`:`<button class="btn btn-o btn-sm" data-closetopic="${i}">${ic('x')} Close</button>`}</div>`;}).join('')}
 </div>
-<div class="card">
-  <div class="head"><h3>Common causes of weld defects</h3><span class="muted" style="font-size:var(--fs-meta)">2022-Welder · score participation &amp; merit</span></div>
-  <div class="infobox">${ic('info')}<div class="im"><b>Score each contribution.</b> Rate the merit of the point raised (1–5 stars). Scores log against the learner's record and feed result analysis and engagement reporting (FR-7.3, FR-7.4).</div></div>
-  ${POSTS.map(p=>`<div class="lrow"><span class="ava">${initials(p.nm)}</span><div style="flex:1"><div class="nm">${p.nm}</div><div class="mt" style="line-height:1.5">${p.mt}</div></div><div style="text-align:right">${stars(p.stars)}<div class="muted" style="font-size:var(--fs-meta);margin-top:4px">Merit ${p.stars}/5</div></div></div>`).join('')}
+<div class="card" id="tresp">
+  <div class="head"><h3>${st.t}</h3><span class="muted" style="font-size:var(--fs-meta)">${st.batch} · ${sscored}/${sposts} rated</span></div>
+  <div class="infobox">${ic('info')}<div class="im"><b>Rate each reply.</b> Tap the stars to score the merit of a learner's reply (1–5). Ratings save against the learner's record and feed result analysis and engagement reporting (FR-7.3, FR-7.4).</div></div>
+  ${sposts?st.replies.map((p,ri)=>`<div class="lrow"><span class="ava">${initials(p.nm)}</span><div style="flex:1"><div class="nm">${p.nm}</div><div class="mt" style="line-height:1.5">${p.mt}</div></div><div style="text-align:right">${rateStars(SELTOPIC,ri,p.rating)}<div class="muted" style="font-size:var(--fs-meta);margin-top:4px">${p.rating?'Merit '+p.rating+'/5':'Not yet rated'}</div></div></div>`).join(''):`<div class="muted" style="text-align:center;padding:24px 0">No replies yet on this topic.</div>`}
 </div>`;
+};
 
 V.timetable=()=>`
 <div class="card">
@@ -1154,7 +1169,7 @@ document.addEventListener('click',e=>{
   const oc=e.target.closest('[data-open-class]');if(oc){CURCLASS=oc.dataset.openClass;render('course');return;}
   const ct=e.target.closest('[data-closetopic]');if(ct){const t=TOPICS[+ct.dataset.closetopic];if(t)confirmModal('c-amber','alert','Close discussion','Close <b>'+t.t+'</b>? It moves to the learners’ History and becomes read-only — no new replies can be posted.','Close discussion',()=>{t.closed=true;render('forum');toast('c-green','check','Discussion closed','“'+t.t+'” is now closed.');});return;}
   const rt=e.target.closest('[data-reopentopic]');if(rt){const t=TOPICS[+rt.dataset.reopentopic];if(t){t.closed=false;render('forum');toast('c-green','check','Discussion reopened','Learners can reply to this discussion again.');}return;}
-  const ot=e.target.closest('[data-open-topic]');if(ot){render('forum');scrollTo(0,400);return;}
+  const ot=e.target.closest('[data-open-topic]');if(ot){SELTOPIC=+ot.dataset.openTopic;render('forum');const el=document.getElementById('tresp');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});return;}
   const raise=e.target.closest('[data-raise]');if(raise){toast('c-green','check','Case submitted','Your case has been raised. The support desk will respond by email.');return;}
   const sub=e.target.closest('[data-submit-att]');if(sub){confirmModal('c-green','check','Submit attendance','Submit attendance for <b>2022-Welder · 23 Jul</b>?','Submit',()=>{render('attend');});return;}
 
@@ -1170,6 +1185,7 @@ document.addEventListener('click',e=>{
   const rad=e.target.closest('[data-radio]');if(rad){rad.closest('.card').querySelectorAll('[data-radio]').forEach(x=>x.classList.remove('on'));rad.classList.add('on');return;}
   const ck=e.target.closest('[data-check]');if(ck){ck.classList.toggle('on');return;}
 
+  const rst=e.target.closest('[data-rate] svg');if(rst){const wrap=rst.closest('[data-rate]');const p=wrap.dataset.rate.split('-');const ti=+p[0],ri=+p[1];const idx=[...wrap.children].indexOf(rst);const tp=TOPICS[ti];if(tp&&tp.replies[ri]){const rep=tp.replies[ri];const was=rep.rating;rep.rating=idx+1;render('forum');const el=document.getElementById('tresp');if(el)el.scrollIntoView({block:'start'});if(!was)toast('c-green','check','Reply rated','Scored '+rep.nm+"'s reply "+(idx+1)+'/5. It now logs against their record.');}return;}
   const st=e.target.closest('[data-stars] svg');if(st){const wrap=st.closest('[data-stars]');const kids=[...wrap.children];const idx=kids.indexOf(st);kids.forEach((k,i)=>k.classList.toggle('on',i<=idx));const lbl=wrap.parentElement.querySelector('.muted');if(lbl&&/Merit/.test(lbl.textContent))lbl.textContent='Merit '+(idx+1)+'/5';return;}
 });
 
