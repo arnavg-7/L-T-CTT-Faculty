@@ -423,9 +423,9 @@ const MSESSIONS=[
   {student:'Rakeshbhai Patel',date:'28 Jul 2026',time:'03:00 PM',topic:'Attendance concern',status:'Missed',remark:''}
 ];
 const TOPICS=[
-  {t:'Common causes of weld defects — share what you have seen',batch:'2022-Welder',posts:14,scored:9,by:'You'},
-  {t:'Best safety practice you follow every day',batch:'2022-Welder',posts:9,scored:9,by:'You'},
-  {t:'MIG vs TIG — when would you pick each?',batch:'2025-Welder',posts:6,scored:0,by:'You'}
+  {t:'Common causes of weld defects — share what you have seen',batch:'2022-Welder',posts:14,scored:9,by:'You',closed:false},
+  {t:'Best safety practice you follow every day',batch:'2022-Welder',posts:9,scored:9,by:'You',closed:false},
+  {t:'MIG vs TIG — when would you pick each?',batch:'2025-Welder',posts:6,scored:0,by:'You',closed:false}
 ];
 const POSTS=[
   {nm:'Jeelkumar Tandel',mt:'Lack of shielding gas coverage causes porosity — I keep the nozzle close and check the flow meter before every run.',stars:5},
@@ -844,7 +844,7 @@ V.mentor=()=>{
 V.forum=()=>`
 <div class="card" style="margin-bottom:20px">
   <div class="head"><h3>Discussion topics</h3><button class="btn btn-p btn-sm" data-newtopic>${ic('plus')} Post topic</button></div>
-  ${TOPICS.map((t,i)=>`<div class="lrow" data-open-topic="${i}" style="cursor:pointer"><span class="chip c-green" style="width:36px;height:36px;border-radius:10px">${ic('chat')}</span><div style="flex:1"><div class="nm">${t.t}</div><div class="mt">${t.batch} · ${t.posts} posts · created by ${t.by}</div></div>${t.scored===t.posts?pill('p-ok','All scored'):pill('p-warn',(t.posts-t.scored)+' to score')}</div>`).join('')}
+  ${TOPICS.map((t,i)=>`<div class="lrow" data-open-topic="${i}" style="cursor:pointer${t.closed?';opacity:.68':''}"><span class="chip c-green" style="width:36px;height:36px;border-radius:10px">${ic('chat')}</span><div style="flex:1"><div class="nm">${t.t}</div><div class="mt">${t.batch} · ${t.posts} posts · created by ${t.by}</div></div>${t.closed?'<span class="pill" style="background:var(--line);color:var(--muted)">Closed</span>':(t.scored===t.posts?pill('p-ok','All scored'):pill('p-warn',(t.posts-t.scored)+' to score'))}${t.closed?`<button class="btn btn-o btn-sm" data-reopentopic="${i}">Reopen</button>`:`<button class="btn btn-o btn-sm" data-closetopic="${i}">${ic('x')} Close</button>`}</div>`).join('')}
 </div>
 <div class="card">
   <div class="head"><h3>Common causes of weld defects</h3><span class="muted" style="font-size:var(--fs-meta)">2022-Welder · score participation &amp; merit</span></div>
@@ -1152,6 +1152,8 @@ document.addEventListener('click',e=>{
   if(add){const key=add.dataset.add;const nm=add.dataset.nm;const f=F[key];if(f){const [t,b,cl]=f(nm);formModal(t,b,cl,()=>{if(key==='manual')toast('c-green','check','Marks submitted','Marks for '+(nm||'the student')+' have been submitted to the record.');else toast('c-green','check','Saved','Your changes have been saved.');});}return;}
 
   const oc=e.target.closest('[data-open-class]');if(oc){CURCLASS=oc.dataset.openClass;render('course');return;}
+  const ct=e.target.closest('[data-closetopic]');if(ct){const t=TOPICS[+ct.dataset.closetopic];if(t)confirmModal('c-amber','alert','Close discussion','Close <b>'+t.t+'</b>? It moves to the learners’ History and becomes read-only — no new replies can be posted.','Close discussion',()=>{t.closed=true;render('forum');toast('c-green','check','Discussion closed','“'+t.t+'” is now closed.');});return;}
+  const rt=e.target.closest('[data-reopentopic]');if(rt){const t=TOPICS[+rt.dataset.reopentopic];if(t){t.closed=false;render('forum');toast('c-green','check','Discussion reopened','Learners can reply to this discussion again.');}return;}
   const ot=e.target.closest('[data-open-topic]');if(ot){render('forum');scrollTo(0,400);return;}
   const raise=e.target.closest('[data-raise]');if(raise){toast('c-green','check','Case submitted','Your case has been raised. The support desk will respond by email.');return;}
   const sub=e.target.closest('[data-submit-att]');if(sub){confirmModal('c-green','check','Submit attendance','Submit attendance for <b>2022-Welder · 23 Jul</b>?','Submit',()=>{render('attend');});return;}
