@@ -246,6 +246,11 @@
   .donut .dv b{font-size:19px;font-weight:700;display:block;line-height:1}
   .donut .dv small{font-size:9.5px;color:var(--muted)}
 
+  .pdfview{position:fixed;inset:0;background:rgba(25,35,55,.78);display:none;z-index:300;padding:22px}
+  .pdfview.show{display:block}
+  .pdfview iframe{width:100%;height:100%;border:none;border-radius:8px;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .pdfview .pv-close{position:absolute;top:14px;right:14px;width:42px;height:42px;border-radius:50%;background:#fff;border:none;cursor:pointer;display:grid;place-items:center;box-shadow:0 4px 16px rgba(0,0,0,.35);z-index:2}
+  .pdfview .pv-close svg{width:20px;height:20px;color:#333}
   .modal{position:fixed;inset:0;background:rgba(20,40,92,.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
   .modal.show{display:flex}
   .mbox{background:var(--card);border-radius:var(--r);box-shadow:0 20px 55px rgba(0,0,0,.28);max-width:480px;width:100%;padding:26px 28px;animation:pop .18s ease;max-height:90vh;overflow:auto}
@@ -769,10 +774,10 @@ V.qbank=()=>`
 function actSubsInline(a){
   var roster=STUDENTS.slice(0,10),ext=a.type==='Video'?'mp4':a.type==='PDF'?'pdf':'docx';
   return '<div class="muted" style="font-size:var(--fs-meta);margin:6px 0 12px">'+a.brief+' · upload type '+a.type+' · review only, no scoring</div>'
-    +(a.attach?'<div class="lrow" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px"><span class="chip c-sky" style="width:34px;height:34px;border-radius:9px;flex:none">'+ic('doc')+'</span><div style="flex:1;min-width:0"><div class="nm">'+a.attach.name+'</div><div class="mt">Reference file attached for trainees</div></div><button class="btn btn-o btn-sm" data-actfile>'+ic('download')+' Download</button></div>':'')
+    +(a.attach?'<div class="lrow" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px"><span class="chip c-sky" style="width:34px;height:34px;border-radius:9px;flex:none">'+ic('doc')+'</span><div style="flex:1;min-width:0"><div class="nm">'+a.attach.name+'</div><div class="mt">Reference file attached for trainees</div></div><button class="btn btn-o btn-sm" data-actview data-kind="ref" data-fn="'+esca(a.attach.name)+'" data-act="'+esca(a.title)+'">'+ic('eye')+' Open</button></div>':'')
     +'<div class="scroll-x"><table class="tbl"><thead><tr><th>Student</th><th>Status</th><th>File</th><th></th></tr></thead><tbody>'
     +roster.map(function(s,i){var done=a.submitted>0&&i<Math.min(a.submitted,roster.length);var fn=s.nm.split(' ')[0].toLowerCase()+'-submission.'+ext;
-      return '<tr><td class="nm">'+s.nm+'</td><td>'+(done?pill('p-ok','Submitted'):pill('p-neu','Pending'))+'</td><td class="muted">'+(done?fn:'—')+'</td><td style="text-align:right">'+(done?'<button class="btn btn-o btn-sm" data-actfile>'+ic('eye')+' View</button>':'')+'</td></tr>';}).join('')
+      return '<tr><td class="nm">'+s.nm+'</td><td>'+(done?pill('p-ok','Submitted'):pill('p-neu','Pending'))+'</td><td class="muted">'+(done?fn:'—')+'</td><td style="text-align:right">'+(done?'<button class="btn btn-o btn-sm" data-actview data-kind="sub" data-fn="'+fn+'" data-who="'+esca(s.nm)+'" data-act="'+esca(a.title)+'">'+ic('eye')+' View</button>':'')+'</td></tr>';}).join('')
     +'</tbody></table></div>';
 }
 function actRow(a){
@@ -1181,6 +1186,43 @@ V.profile=()=>`
 </div>`;
 function pill(c,t){return '<span class="pill '+c+'">'+t+'</span>';}
 function csp(s){return {Open:'p-warn','In progress':'p-info',Resolved:'p-ok',Closed:'p-neu'}[s]||'p-neu';}
+/* ---------- PDF viewer (opens documents like a native PDF viewer) ---------- */
+let PDFURL=null;
+function openPdfViewer(blob,name){
+  if(PDFURL)URL.revokeObjectURL(PDFURL);
+  PDFURL=URL.createObjectURL(blob);
+  let ov=document.getElementById('pdfview');
+  if(!ov){ov=document.createElement('div');ov.id='pdfview';ov.className='pdfview';document.body.appendChild(ov);}
+  ov.innerHTML='<button class="pv-close" data-pvclose aria-label="Close">'+ic('x')+'</button><iframe title="'+(name||'Document')+'" src="'+PDFURL+'#toolbar=1&view=FitH"></iframe>';
+  ov.classList.add('show');
+}
+function closePdfViewer(){const ov=document.getElementById('pdfview');if(ov)ov.classList.remove('show');}
+function esca(s){return String(s).replace(/"/g,'&quot;');}
+function docPDF(fname,header,lines){
+  var W=595,H=842;
+  var esc=function(s){return String(s).replace(/[\\()]/g,function(m){return '\\'+m;}).replace(/[^\x20-\x7E]/g,'-');};
+  var g='';
+  g+='0.078 0.157 0.361 rg 0 '+(H-92)+' '+W+' 92 re f\n';
+  g+='1 1 1 rg\nBT /F2 22 Tf 50 '+(H-52)+' Td ('+esc(header)+') Tj ET\n';
+  g+='BT /F1 10 Tf 50 '+(H-72)+' Td (L & T   C T T   S K I L L I N G   L M S) Tj ET\n';
+  var y=H-138;
+  g+='0.1 0.13 0.18 rg\nBT /F2 15 Tf 50 '+y+' Td ('+esc(fname)+') Tj ET\n';y-=32;
+  g+='0.3 0.3 0.3 rg\n';
+  lines.forEach(function(ln){g+='BT /F2 11 Tf 50 '+y+' Td ('+esc(ln[0])+':) Tj ET\n';g+='BT /F1 11 Tf 170 '+y+' Td ('+esc(ln[1])+') Tj ET\n';y-=22;});
+  y-=22;
+  g+='0.45 0.45 0.45 rg\nBT /F1 11 Tf 50 '+y+' Td (This is a prototype preview - the actual uploaded document would render here.) Tj ET\n';
+  g+='0.85 0.85 0.85 RG 1 w 40 40 '+(W-80)+' '+(H-146)+' re S\n';
+  var objs=[null,'<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>',
+    '<< /Length '+g.length+' >>\nstream\n'+g+'\nendstream',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>'];
+  var pdf='%PDF-1.4\n',off=[];
+  for(var i=1;i<objs.length;i++){off[i]=pdf.length;pdf+=i+' 0 obj\n'+objs[i]+'\nendobj\n';}
+  var xr=pdf.length;pdf+='xref\n0 '+objs.length+'\n0000000000 65535 f \n';
+  for(i=1;i<objs.length;i++){pdf+=String(off[i]).padStart(10,'0')+' 00000 n \n';}
+  pdf+='trailer\n<< /Size '+objs.length+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF';
+  return new Blob([pdf],{type:'application/pdf'});
+}
 
 /* ---------- NAV / ROUTER ---------- */
 let SELSTU=1094;
@@ -1297,7 +1339,8 @@ document.addEventListener('click',e=>{
   const nact=e.target.closest('[data-newact]');if(nact){ACTCTX=nact.dataset.ctx||'assess';openNewAct();return;}
   const nas=e.target.closest('[data-newact-save]');if(nas){const ti=document.getElementById('na-title'),ba=document.getElementById('na-batch'),ty=document.getElementById('na-type'),br=document.getElementById('na-brief');const title=ti?ti.value.trim():'';if(!title){toast('c-amber','alert','Add a title','Give the activity a title before creating it.');return;}const bn=ba?ba.value:CLASSES[0].name;const cls=CLASSES.find(c=>c.name===bn);const fi=document.getElementById('na-file');const fname=fi&&fi.files&&fi.files[0]?fi.files[0].name:'';ACTIVITIES.unshift({id:Date.now(),title:title,batch:bn,type:ty?ty.value:'PDF',brief:br?br.value.trim():'',submitted:0,total:cls?cls.students:42,attach:fname?{name:fname,type:'File',meta:'Reference'}:null});closeModal();if(ACTCTX==='course'){render('course');const tb=document.querySelector('.tabs[data-tabs="course"] button[data-p="assess"]');if(tb)tb.click();}else{render('assess');}toast('c-green','check','Activity created','“'+title+'” is now open for submissions.');return;}
   const asub=e.target.closest('[data-actsubs]');if(asub){openActSubs(parseInt(asub.dataset.actsubs,10));return;}
-  if(e.target.closest('[data-actfile]')){toast('c-sky','doc','Submission','This is a prototype — the trainee’s uploaded file would open here for review.');return;}
+  if(e.target.closest('[data-pvclose]')||e.target.id==='pdfview'){closePdfViewer();return;}
+  const av=e.target.closest('[data-actview]');if(av){var fn=av.dataset.fn||'Document.pdf';var isRef=av.dataset.kind==='ref';var header=isRef?'Reference material':'Trainee submission';var lines=isRef?[['File',fn],['Activity',av.dataset.act||''],['Shared with','Trainees in this batch']]:[['File',fn],['Submitted by',av.dataset.who||''],['Activity',av.dataset.act||'']];openPdfViewer(docPDF(fn,header,lines),fn);return;}
   const nform=e.target.closest('[data-newform]');if(nform){ACTCTX=nform.dataset.ctx||'assess';FORMEDIT=-1;FORMDRAFT={kind:'Pre-test',qs:[]};render('formnew');return;}
   const eform=e.target.closest('[data-editform]');if(eform){ACTCTX=document.querySelector('.tabs[data-tabs="course"]')?'course':'assess';openFormEdit(parseInt(eform.dataset.editform,10));return;}
   const vresp=e.target.closest('[data-viewresp]');if(vresp){const p=vresp.dataset.viewresp.split(':');FRESP_FID=parseInt(p[0],10);FRESP_SI=parseInt(p[1],10);ACTCTX=document.querySelector('.tabs[data-tabs="course"]')?'course':'assess';render('formresp');return;}
