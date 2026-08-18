@@ -769,6 +769,7 @@ V.qbank=()=>`
 function actSubsInline(a){
   var roster=STUDENTS.slice(0,10),ext=a.type==='Video'?'mp4':a.type==='PDF'?'pdf':'docx';
   return '<div class="muted" style="font-size:var(--fs-meta);margin:6px 0 12px">'+a.brief+' · upload type '+a.type+' · review only, no scoring</div>'
+    +(a.attach?'<div class="lrow" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px"><span class="chip c-sky" style="width:34px;height:34px;border-radius:9px;flex:none">'+ic('doc')+'</span><div style="flex:1;min-width:0"><div class="nm">'+a.attach.name+'</div><div class="mt">Reference file attached for trainees</div></div><button class="btn btn-o btn-sm" data-actfile>'+ic('download')+' Download</button></div>':'')
     +'<div class="scroll-x"><table class="tbl"><thead><tr><th>Student</th><th>Status</th><th>File</th><th></th></tr></thead><tbody>'
     +roster.map(function(s,i){var done=a.submitted>0&&i<Math.min(a.submitted,roster.length);var fn=s.nm.split(' ')[0].toLowerCase()+'-submission.'+ext;
       return '<tr><td class="nm">'+s.nm+'</td><td>'+(done?pill('p-ok','Submitted'):pill('p-neu','Pending'))+'</td><td class="muted">'+(done?fn:'—')+'</td><td style="text-align:right">'+(done?'<button class="btn btn-o btn-sm" data-actfile>'+ic('eye')+' View</button>':'')+'</td></tr>';}).join('')
@@ -823,6 +824,7 @@ function openNewAct(){
     '<div class="field"><label>Title</label><input id="na-title" placeholder="e.g. Weld bead practice log"></div>'+
     '<div class="rowf"><div class="field"><label>Batch</label><select id="na-batch">'+CLASSES.map(c=>'<option'+(c.name===defB?' selected':'')+'>'+c.name+'</option>').join('')+'</select></div><div class="field"><label>Submission type</label><select id="na-type"><option>PDF</option><option>Doc</option><option>Video</option></select></div></div>'+
     '<div class="field"><label>Brief</label><textarea id="na-brief" placeholder="Explain what the trainee should do and what to upload..."></textarea></div>'+
+    '<div class="field"><label>Attach a reference file <span class="muted">(optional)</span></label><input type="file" id="na-file"></div>'+
     '<div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-newact-save>Create activity</button></div></div>');
 }
 function openActSubs(id){
@@ -1286,7 +1288,7 @@ document.addEventListener('click',e=>{
 
   // activities + pre/post test
   const nact=e.target.closest('[data-newact]');if(nact){ACTCTX=nact.dataset.ctx||'assess';openNewAct();return;}
-  const nas=e.target.closest('[data-newact-save]');if(nas){const ti=document.getElementById('na-title'),ba=document.getElementById('na-batch'),ty=document.getElementById('na-type'),br=document.getElementById('na-brief');const title=ti?ti.value.trim():'';if(!title){toast('c-amber','alert','Add a title','Give the activity a title before creating it.');return;}const bn=ba?ba.value:CLASSES[0].name;const cls=CLASSES.find(c=>c.name===bn);ACTIVITIES.unshift({id:Date.now(),title:title,batch:bn,type:ty?ty.value:'PDF',brief:br?br.value.trim():'',submitted:0,total:cls?cls.students:42});closeModal();if(ACTCTX==='course'){render('course');const tb=document.querySelector('.tabs[data-tabs="course"] button[data-p="assess"]');if(tb)tb.click();}else{render('assess');}toast('c-green','check','Activity created','“'+title+'” is now open for submissions.');return;}
+  const nas=e.target.closest('[data-newact-save]');if(nas){const ti=document.getElementById('na-title'),ba=document.getElementById('na-batch'),ty=document.getElementById('na-type'),br=document.getElementById('na-brief');const title=ti?ti.value.trim():'';if(!title){toast('c-amber','alert','Add a title','Give the activity a title before creating it.');return;}const bn=ba?ba.value:CLASSES[0].name;const cls=CLASSES.find(c=>c.name===bn);const fi=document.getElementById('na-file');const fname=fi&&fi.files&&fi.files[0]?fi.files[0].name:'';ACTIVITIES.unshift({id:Date.now(),title:title,batch:bn,type:ty?ty.value:'PDF',brief:br?br.value.trim():'',submitted:0,total:cls?cls.students:42,attach:fname?{name:fname,type:'File',meta:'Reference'}:null});closeModal();if(ACTCTX==='course'){render('course');const tb=document.querySelector('.tabs[data-tabs="course"] button[data-p="assess"]');if(tb)tb.click();}else{render('assess');}toast('c-green','check','Activity created','“'+title+'” is now open for submissions.');return;}
   const asub=e.target.closest('[data-actsubs]');if(asub){openActSubs(parseInt(asub.dataset.actsubs,10));return;}
   if(e.target.closest('[data-actfile]')){toast('c-sky','doc','Submission','This is a prototype — the trainee’s uploaded file would open here for review.');return;}
   const nform=e.target.closest('[data-newform]');if(nform){ACTCTX=nform.dataset.ctx||'assess';FORMEDIT=-1;FORMDRAFT={kind:'Pre-test',qs:[]};render('formnew');return;}
