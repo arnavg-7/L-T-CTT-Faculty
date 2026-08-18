@@ -422,6 +422,11 @@ const FORMS=[
   ]}
 ];
 let FORMDRAFT={kind:'Pre-test',qs:[]};
+const CERTS=[
+  {id:'CTT-2026-WLD-001',course:'Welding Fundamentals',date:'12 Jun 2026',hours:120},
+  {id:'CTT-2026-SAF-014',course:'Workshop Safety & PPE',date:'28 Apr 2026',hours:24},
+  {id:'CTT-2025-EMP-007',course:'Employability & Communication',date:'19 Dec 2025',hours:40}
+];
 const MODULES=['Safety & Basics','Weld Symbols','Arc Welding','Inspection & QC'];
 const CONTENT={
   w2022:[
@@ -569,7 +574,7 @@ V.student=()=>{
   <div class="stat">${chip('c-lav','chat')}<div><div class="v">${forumLog.length}</div><div class="k">Discussion replies</div></div></div>
 </div>
 <div class="card">
-  <div class="tabs" data-tabs="stu"><button class="active" data-p="asmt">Activities</button><button data-p="tst">Pre / Post test</button><button data-p="ment">Mentoring</button><button data-p="frm">Discussions</button></div>
+  <div class="tabs" data-tabs="stu"><button class="active" data-p="asmt">Activities</button><button data-p="tst">Pre / Post test</button><button data-p="ment">Mentoring</button><button data-p="frm">Discussions</button><button data-p="cert">Certificates</button></div>
   <div data-body="asmt"><table class="tbl"><thead><tr><th>Activity</th><th>Upload type</th><th>Status</th></tr></thead><tbody>
     ${stuActs.length?stuActs.map((a,i)=>`<tr><td class="nm">${a.title}</td><td>${a.type}</td><td>${pill(a.submitted>0&&i<stuActs.length-1?'p-ok':'p-neu',a.submitted>0&&i<stuActs.length-1?'Submitted':'Pending')}</td></tr>`).join(''):'<tr><td colspan="3" class="muted" style="text-align:center;padding:16px 0">No activities assigned to this batch yet.</td></tr>'}
   </tbody></table></div>
@@ -581,6 +586,10 @@ V.student=()=>{
   </div>
   <div data-body="frm" style="display:none">
     ${forumLog.length?`<div class="infobox">${ic('info')}<div class="im"><b>Discussion responses.</b> Every reply ${s.nm.split(' ')[0]} has posted to discussions across the forum — ${forumLog.length} in total.</div></div>`+forumLog.map(f=>`<div class="lrow"><span class="chip c-green" style="width:38px;height:38px;border-radius:10px">${ic('chat')}</span><div style="flex:1;min-width:0"><div class="nm">${f.topic}</div><div class="mt" style="line-height:1.5">“${f.text}”</div><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">${f.batch}</div></div></div>`).join(''):'<div class="muted" style="padding:18px 0;text-align:center">No discussion contributions from this learner yet.</div>'}
+  </div>
+  <div data-body="cert" style="display:none">
+    <div class="infobox">${ic('info')}<div class="im"><b>Certificates earned.</b> ${s.nm.split(' ')[0]} has earned ${CERTS.length} certificate${CERTS.length===1?'':'s'} by completing courses. Open any to view the PDF.</div></div>
+    ${CERTS.map(c=>`<div class="lrow"><span class="chip c-amber" style="width:38px;height:38px;border-radius:10px">${ic('award')}</span><div style="flex:1;min-width:0"><div class="nm">${c.course}</div><div class="mt">Issued ${c.date} · ${c.hours} training hours · ID ${c.id}</div></div><button class="btn btn-o btn-sm" data-viewcert="${c.id}">${ic('eye')} View certificate</button></div>`).join('')}
   </div>
 </div>`;};
 
@@ -1200,6 +1209,38 @@ function openPdfViewer(blob,name){
 }
 function closePdfViewer(){const ov=document.getElementById('pdfview');if(ov)ov.classList.remove('show');}
 function esca(s){return String(s).replace(/"/g,'&quot;');}
+function certPDF(c,name){
+  var W=842,H=595;
+  var esc=function(s){return String(s).replace(/[\\()]/g,function(m){return '\\'+m;}).replace(/[^\x20-\x7E]/g,'-');};
+  var wid=function(t,s){return t.length*s*0.5;};
+  var ctr=function(t,s,f,y,col){var x=(W-wid(t,s))/2;return (col?col+' rg\n':'')+'BT /'+f+' '+s+' Tf '+x.toFixed(1)+' '+y+' Td ('+esc(t)+') Tj ET\n';};
+  var g='';
+  g+='0.078 0.157 0.361 RG 3 w 28 28 '+(W-56)+' '+(H-56)+' re S\n';
+  g+='0.788 0.635 0.294 RG 1.2 w 44 44 '+(W-88)+' '+(H-88)+' re S\n';
+  g+=ctr('L & T   C T T   S K I L L I N G   L M S',12,'F1',H-92,'0.55 0.45 0.20');
+  g+=ctr('CERTIFICATE OF COMPLETION',30,'F2',H-158,'0.078 0.157 0.361');
+  g+='0.788 0.635 0.294 RG 1 w '+(W/2-70)+' '+(H-176)+' m '+(W/2+70)+' '+(H-176)+' l S\n';
+  g+=ctr('This is proudly presented to',13,'F1',H-212,'0.42 0.42 0.42');
+  g+=ctr(name,36,'F3',H-262,'0.11 0.13 0.18');
+  g+=ctr('for successfully completing the course',13,'F1',H-302,'0.42 0.42 0.42');
+  g+=ctr(c.course,23,'F2',H-340,'0.078 0.157 0.361');
+  g+=ctr(c.hours+' training hours',12,'F1',H-372,'0.42 0.42 0.42');
+  g+='0.788 0.635 0.294 RG 1 w 130 145 m 320 145 l S\n';
+  g+='BT /F1 11 Tf 150 126 Td 0.35 0.35 0.35 rg (Master Trainer) Tj ET\n';
+  g+='0.788 0.635 0.294 RG 1 w '+(W-320)+' 145 m '+(W-130)+' 145 l S\n';
+  g+='BT /F1 11 Tf '+(W-292)+' 126 Td 0.35 0.35 0.35 rg (Issued '+esc(c.date)+') Tj ET\n';
+  g+=ctr('Certificate ID  '+c.id,10,'F1',78,'0.5 0.5 0.5');
+  var objs=[null,'<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] /Resources << /Font << /F1 5 0 R /F2 6 0 R /F3 7 0 R >> >> /Contents 4 0 R >>',
+    '<< /Length '+g.length+' >>\nstream\n'+g+'\nendstream',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>','<< /Type /Font /Subtype /Type1 /BaseFont /Times-BoldItalic >>'];
+  var pdf='%PDF-1.4\n',off=[];
+  for(var i=1;i<objs.length;i++){off[i]=pdf.length;pdf+=i+' 0 obj\n'+objs[i]+'\nendobj\n';}
+  var xr=pdf.length;pdf+='xref\n0 '+objs.length+'\n0000000000 65535 f \n';
+  for(i=1;i<objs.length;i++){pdf+=String(off[i]).padStart(10,'0')+' 00000 n \n';}
+  pdf+='trailer\n<< /Size '+objs.length+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF';
+  return new Blob([pdf],{type:'application/pdf'});
+}
 function docPDF(fname,header,lines){
   var W=595,H=842;
   var esc=function(s){return String(s).replace(/[\\()]/g,function(m){return '\\'+m;}).replace(/[^\x20-\x7E]/g,'-');};
@@ -1344,6 +1385,7 @@ document.addEventListener('click',e=>{
   const asub=e.target.closest('[data-actsubs]');if(asub){openActSubs(parseInt(asub.dataset.actsubs,10));return;}
   if(e.target.closest('[data-pvclose]')||e.target.id==='pdfview'){closePdfViewer();return;}
   const av=e.target.closest('[data-actview]');if(av){var fn=av.dataset.fn||'Document.pdf';var isRef=av.dataset.kind==='ref';var header=isRef?'Reference material':'Trainee submission';var lines=isRef?[['File',fn],['Activity',av.dataset.act||''],['Shared with','Trainees in this batch']]:[['File',fn],['Submitted by',av.dataset.who||''],['Activity',av.dataset.act||'']];openPdfViewer(docPDF(fn,header,lines),fn);return;}
+  const vc=e.target.closest('[data-viewcert]');if(vc){var cert=CERTS.find(function(x){return x.id===vc.dataset.viewcert;});if(cert){var stu=STUDENTS.find(function(x){return x.id===SELSTU;})||STUDENTS[0];openPdfViewer(certPDF(cert,stu.nm),(stu.nm+' - '+cert.course+' Certificate.pdf').replace(/[^A-Za-z0-9 .-]/g,''));}return;}
   const atv=e.target.closest('[data-artview]');if(atv){var kd=atv.dataset.kind,url=atv.dataset.url||'',ttl=atv.dataset.title||'Artifact';if((kd==='YouTube'||kd==='Link')&&/^https?:\/\//.test(url)){window.open(url,'_blank','noopener');}else{openPdfViewer(docPDF(url||ttl,'Learning artifact',[['Title',ttl],['Type',kd||'Document'],['Batch',(CLASSES.find(c=>c.id===CURCLASS)||{}).name||'']]),url||ttl);}return;}
   const nform=e.target.closest('[data-newform]');if(nform){ACTCTX=nform.dataset.ctx||'assess';FORMEDIT=-1;FORMDRAFT={kind:'Pre-test',qs:[]};render('formnew');return;}
   const eform=e.target.closest('[data-editform]');if(eform){ACTCTX=document.querySelector('.tabs[data-tabs="course"]')?'course':'assess';openFormEdit(parseInt(eform.dataset.editform,10));return;}
