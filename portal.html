@@ -1278,7 +1278,7 @@ function render(id){
   document.getElementById('pg-crumb').textContent=(T[id]||['',''])[1];
   if(id==='timetable')cal();
   if(id==='testnew')renderTestQ();
-  if(id==='formnew')renderFormQ();
+  if(id==='formnew'){renderFormQ();document.getElementById('pg-title').textContent=FORMEDIT>=0?'Edit Form':'New Form';document.getElementById('pg-crumb').textContent='Activities › '+(FORMEDIT>=0?'Edit form':'New form');}
   if(id==='attend'){ATTCOURSE='';ATTDATE='';renderAttHist();}
   scrollTo(0,0);
 }
