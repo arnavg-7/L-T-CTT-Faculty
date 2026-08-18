@@ -590,7 +590,8 @@ function contentRow(it,i){const [icn,cc]=ctIcon(it.type);
   return '<div class="lrow"><span class="chip '+cc+'" style="width:38px;height:38px;border-radius:10px">'+ic(icn)+'</span>'+
     '<div style="flex:1;min-width:0"><div class="nm">'+it.title+'</div><div class="mt" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+it.type+' · '+it.url+'</div></div>'+
     pill(it.pub?'p-ok':'p-neu',it.pub?'Published':'Draft')+
-    '<button class="btn btn-o btn-sm" data-edit-content="'+i+'" style="margin-left:10px">'+ic('edit')+'</button></div>';
+    '<button class="btn btn-o btn-sm" data-artview data-title="'+esca(it.title)+'" data-kind="'+esca(it.type)+'" data-url="'+esca(it.url||'')+'" style="margin-left:10px">'+ic('eye')+' View</button>'+
+    '<button class="btn btn-o btn-sm" data-edit-content="'+i+'" style="margin-left:8px">'+ic('edit')+'</button></div>';
 }
 function renderContentItems(items){
   const groups={};
@@ -1341,6 +1342,7 @@ document.addEventListener('click',e=>{
   const asub=e.target.closest('[data-actsubs]');if(asub){openActSubs(parseInt(asub.dataset.actsubs,10));return;}
   if(e.target.closest('[data-pvclose]')||e.target.id==='pdfview'){closePdfViewer();return;}
   const av=e.target.closest('[data-actview]');if(av){var fn=av.dataset.fn||'Document.pdf';var isRef=av.dataset.kind==='ref';var header=isRef?'Reference material':'Trainee submission';var lines=isRef?[['File',fn],['Activity',av.dataset.act||''],['Shared with','Trainees in this batch']]:[['File',fn],['Submitted by',av.dataset.who||''],['Activity',av.dataset.act||'']];openPdfViewer(docPDF(fn,header,lines),fn);return;}
+  const atv=e.target.closest('[data-artview]');if(atv){var kd=atv.dataset.kind,url=atv.dataset.url||'',ttl=atv.dataset.title||'Artifact';if((kd==='YouTube'||kd==='Link')&&/^https?:\/\//.test(url)){window.open(url,'_blank','noopener');}else{openPdfViewer(docPDF(url||ttl,'Learning artifact',[['Title',ttl],['Type',kd||'Document'],['Batch',(CLASSES.find(c=>c.id===CURCLASS)||{}).name||'']]),url||ttl);}return;}
   const nform=e.target.closest('[data-newform]');if(nform){ACTCTX=nform.dataset.ctx||'assess';FORMEDIT=-1;FORMDRAFT={kind:'Pre-test',qs:[]};render('formnew');return;}
   const eform=e.target.closest('[data-editform]');if(eform){ACTCTX=document.querySelector('.tabs[data-tabs="course"]')?'course':'assess';openFormEdit(parseInt(eform.dataset.editform,10));return;}
   const vresp=e.target.closest('[data-viewresp]');if(vresp){const p=vresp.dataset.viewresp.split(':');FRESP_FID=parseInt(p[0],10);FRESP_SI=parseInt(p[1],10);ACTCTX=document.querySelector('.tabs[data-tabs="course"]')?'course':'assess';render('formresp');return;}
