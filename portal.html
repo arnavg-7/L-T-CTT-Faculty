@@ -896,9 +896,16 @@ V.formnew=()=>`
   <div class="field" style="margin:0"><label>Form title</label><input id="fb-title" placeholder="e.g. Welder — entry knowledge check"></div>
 </div>
 <div class="card">
-  <div class="head"><h3>Questions <span class="muted" id="fq-count" style="font-weight:500"></span></h3><button class="btn btn-p btn-sm" data-form-addq>${ic('plus')} Add question</button></div>
+  <div class="head"><h3>Questions <span class="muted" id="fq-count" style="font-weight:500"></span></h3></div>
   <div id="fq-list"></div>
-  <div class="infobox" style="margin-top:14px">${ic('info')}<div class="im">Add multiple-choice or open-text questions. These forms are <b>not scored</b> — they capture where each trainee stands at the start or end of the batch.</div></div>
+  <div style="border-top:1px solid var(--line);margin-top:16px;padding-top:18px">
+    <div class="lbl" style="margin-bottom:12px">Add a question</div>
+    <div class="field"><label>Question</label><textarea id="fq-q" placeholder="Type the question..."></textarea></div>
+    <div class="field"><label>Answer type</label><select id="fq-type" onchange="document.getElementById('fq-opts-wrap').style.display=this.value==='mcq'?'':'none'"><option value="mcq">Multiple choice</option><option value="text">Open text</option></select></div>
+    <div class="field" id="fq-opts-wrap"><label>Options — one per line <span class="muted">(multiple choice only)</span></label><textarea id="fq-opts" placeholder="Option A\nOption B\nOption C"></textarea></div>
+    <button class="btn btn-p btn-sm" data-formq-add>${ic('plus')} Add question</button>
+  </div>
+  <div class="infobox" style="margin-top:16px">${ic('info')}<div class="im">Add as many multiple-choice or open-text questions as you need, then <b>${FORMEDIT>=0?'Save form':'Publish form'}</b>. These forms are <b>not scored</b> — they capture where each trainee stands at the start or end of the batch.</div></div>
 </div>`;
 function renderFormQ(){
   const el=document.getElementById('fq-list');if(!el)return;
@@ -1296,6 +1303,7 @@ document.addEventListener('click',e=>{
   const vresp=e.target.closest('[data-viewresp]');if(vresp){const p=vresp.dataset.viewresp.split(':');FRESP_FID=parseInt(p[0],10);FRESP_SI=parseInt(p[1],10);ACTCTX=document.querySelector('.tabs[data-tabs="course"]')?'course':'assess';render('formresp');return;}
   if(e.target.closest('[data-formresp-back]')){if(ACTCTX==='course'){render('course');const tb=document.querySelector('.tabs[data-tabs="course"] button[data-p="assess"]');if(tb)tb.click();}else{render('assess');}return;}
   const fsub=e.target.closest('[data-ftab]');if(fsub){const scope=fsub.closest('.acc-b')||fsub.closest('.subtabs').parentElement;const key=fsub.dataset.ftab;scope.querySelectorAll('.subtabs button').forEach(b=>b.classList.toggle('active',b===fsub));scope.querySelectorAll('[data-fpanel]').forEach(p=>{if(p.closest('.acc-b')===scope)p.style.display=p.dataset.fpanel===key?'':'none';});return;}
+  const fqa=e.target.closest('[data-formq-add]');if(fqa){const q=document.getElementById('fq-q'),ty=document.getElementById('fq-type'),op=document.getElementById('fq-opts');const qt=q?q.value.trim():'';if(!qt){toast('c-amber','alert','Add the question','Type the question text first.');return;}const type=ty?ty.value:'mcq';let opts=[];if(type==='mcq'){opts=(op?op.value:'').split('\n').map(s=>s.trim()).filter(Boolean);if(opts.length<2){toast('c-amber','alert','Add options','Multiple-choice needs at least two options (one per line).');return;}}FORMDRAFT.qs.push({t:type,q:qt,opts:opts});renderFormQ();if(q)q.value='';if(op)op.value='';if(q)q.focus();return;}
   if(e.target.closest('[data-form-addq]')){openFormQModal();return;}
   const fqs=e.target.closest('[data-formq-save]');if(fqs){const q=document.getElementById('fq-q'),ty=document.getElementById('fq-type'),op=document.getElementById('fq-opts');const qt=q?q.value.trim():'';if(!qt){toast('c-amber','alert','Add the question','Type the question text first.');return;}const type=ty?ty.value:'mcq';let opts=[];if(type==='mcq'){opts=(op?op.value:'').split('\n').map(s=>s.trim()).filter(Boolean);if(opts.length<2){toast('c-amber','alert','Add options','Multiple-choice needs at least two options (one per line).');return;}}FORMDRAFT.qs.push({t:type,q:qt,opts:opts});closeModal();renderFormQ();return;}
   const fdq=e.target.closest('[data-form-delq]');if(fdq){FORMDRAFT.qs.splice(parseInt(fdq.dataset.formDelq,10),1);renderFormQ();return;}
