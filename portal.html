@@ -322,6 +322,8 @@ const ICONS={
   edit:'M4 20h4L18 10l-4-4L4 16zM14 6l4 4',
   filter:'M3 5h18l-7 8v6l-4-2v-4z',
   search:'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4-4',
+  eye:'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5',
+  upload:'M12 16V5m0 0 4 4m-4-4-4 4M5 20h14',
   clock:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7.5V12l3 1.8',
   play:'M8 5v14l11-7z',
   pdf:'M6 3h9l3 3v15H6zM15 3v4h3M8 13h2a1.5 1.5 0 0 1 0 3H8zM8 13v6',
@@ -388,6 +390,29 @@ const TESTS=[
   {nm:'Arc Welding Fundamentals',batch:'2025-Welder',qs:15,marks:60,status:'Draft',win:'—',attempts:'0 / 23'},
   {nm:'Inspection & QC',batch:'2022-Welder',qs:8,marks:32,status:'Draft',win:'—',attempts:'0 / 42'}
 ];
+const ACTIVITIES=[
+  {id:0,title:'Weld bead practice log',batch:'2022-Welder',type:'Doc',brief:'Complete 5 practice weld beads and upload photos plus a short note on the settings you used for each run.',submitted:34,total:42},
+  {id:1,title:'Workshop safety checklist',batch:'2022-Welder',type:'PDF',brief:'Fill in and upload the signed pre-work safety checklist before your next practical session.',submitted:40,total:42},
+  {id:2,title:'MIG vs TIG — when to use each',batch:'2025-Welder',type:'Video',brief:'Record a 2-minute video explaining one job where you would choose MIG and one where you would choose TIG.',submitted:12,total:23},
+  {id:3,title:'Tolerance measurement sheet',batch:'2022-Welder',type:'Doc',brief:'Measure the three sample parts provided and upload your completed tolerance sheet.',submitted:0,total:42}
+];
+const FORMS=[
+  {id:0,kind:'Pre-test',batch:'2022-Welder',title:'Welder — entry knowledge check',responses:38,total:42,questions:[
+    {t:'mcq',q:'Have you welded before joining this batch?',opts:['Never','A little','Regularly']},
+    {t:'mcq',q:'Which of these do you think is essential before striking an arc?',opts:['Only gloves','Helmet, gloves and apron','No PPE is needed']},
+    {t:'text',q:'In your own words, what do you hope to learn in this course?'}
+  ]},
+  {id:1,kind:'Post-test',batch:'2022-Welder',title:'Welder — exit knowledge check',responses:0,total:42,questions:[
+    {t:'mcq',q:'Which shielding gas is commonly used for TIG welding of aluminium?',opts:['Argon','Oxygen','CO2 only']},
+    {t:'text',q:'Describe one welding defect you can now identify and how you would prevent it.'},
+    {t:'text',q:'What topic are you still unsure about?'}
+  ]},
+  {id:2,kind:'Pre-test',batch:'2025-Welder',title:'Advanced Welder — entry check',responses:20,total:23,questions:[
+    {t:'mcq',q:'How confident are you reading weld symbols on a drawing?',opts:['Not at all','Somewhat','Very confident']},
+    {t:'text',q:'What prior welding experience do you bring to this batch?'}
+  ]}
+];
+let FORMDRAFT={kind:'Pre-test',qs:[]};
 const MODULES=['Safety & Basics','Weld Symbols','Arc Welding','Inspection & QC'];
 const CONTENT={
   w2022:[
@@ -484,27 +509,14 @@ const V={};
 
 V.home=()=>`
 <div class="stats">
-  <div class="stat">${chip('c-sky','users')}<div><div class="v">3</div><div class="k">My classes</div></div></div>
-  <div class="stat">${chip('c-green','user')}<div><div class="v">66</div><div class="k">Total students</div></div></div>
+  <div class="stat">${chip('c-sky','users')}<div><div class="v">3</div><div class="k">My Batch</div></div></div>
+  <div class="stat">${chip('c-green','user')}<div><div class="v">1,286</div><div class="k">Total students · all LMS</div></div></div>
   <div class="stat">${chip('c-lav','calchk')}<div><div class="v">1030</div><div class="k">Sessions · 5 conducted</div></div></div>
-  <div class="stat">${chip('c-amber','clip')}<div><div class="v">4</div><div class="k">Pending grading</div></div></div>
+  <div class="stat">${chip('c-amber','clip')}<div><div class="v">4</div><div class="k">Pending activities</div></div></div>
 </div>
-<div class="card" style="margin-bottom:20px">
-  <div class="head"><h3>My classes</h3><a class="link" data-goto="students">My students ${ic('arr')}</a></div>
+<div class="card">
+  <div class="head"><h3>My Batch</h3><a class="link" data-goto="students">My students ${ic('arr')}</a></div>
   <div class="grid g3">${CLASSES.map(clsCard).join('')}</div>
-</div>
-<div class="grid g2e">
-  <div class="card">
-    <div class="head"><h3>Today's timetable</h3><a class="link" data-goto="timetable">Full ${ic('arr')}</a></div>
-    ${TODAY.map(r=>lrow(r[1],r[2],'<div class="time">'+r[0].split(' – ')[0]+'</div>')).join('')}
-  </div>
-  <div class="card">
-    <div class="head"><h3>Needs your attention</h3><a class="link" data-goto="assess">Assessments ${ic('arr')}</a></div>
-    ${lrow('Grade — Safety & PPE MCQ','2022-Welder · 38 attempts to review',pill('p-warn','Pending'))}
-    ${lrow('Score forum merit','2025-Welder · MIG vs TIG topic · 6 posts',pill('p-warn','Pending'))}
-    ${lrow('Weld Symbols Quiz','2022-Welder · results consolidated',pill('p-ok','Done'))}
-    ${lrow('Publish — Arc Welding test','2025-Welder · still in draft',pill('p-neu','Draft'))}
-  </div>
 </div>`;
 
 V.students=()=>{
@@ -512,23 +524,25 @@ V.students=()=>{
   const roster=STUDENTS.filter(s=>s.crs.includes(CURCLASS));
   return `
 <div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-  <div style="font-weight:600">Course</div>
+  <div style="font-weight:600">Batch</div>
   <div class="seg" data-classseg>${CLASSES.map(x=>`<button data-class="${x.id}" class="${x.id===CURCLASS?'active':''}">${x.name}</button>`).join('')}</div>
   <div class="muted" style="font-size:var(--fs-meta);margin-left:auto">Section ${c.sec||'—'} · ${roster.length} student${roster.length===1?'':'s'}</div>
 </div>
 <div class="card">
   <div class="head"><h3>Students in ${c.name}</h3><div class="search" style="width:230px">${ic('search')}<input placeholder="${roster.length} records..." data-search></div></div>
-  ${roster.length?`<div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Name</th><th>Registration ID</th><th>Email</th><th>Attendance</th><th>Avg score</th><th>Standing</th></tr></thead><tbody>
+  ${roster.length?`<div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Name</th><th>Registration ID</th><th>Email</th><th>Attendance</th><th>Standing</th></tr></thead><tbody>
   ${roster.map(s=>{const em=s.nm.toLowerCase().replace(/ /g,'.').replace(/[^a-z.]/g,'')+'.'+s.id+'@ltpct.local';const ac=s.att>=75?'var(--ok)':s.att>=50?'var(--warn)':'var(--bad)';
-    return `<tr data-goto="student" data-sid="${s.id}" data-back="students"><td class="nm"><div style="display:flex;align-items:center;gap:12px"><span class="ava">${initials(s.nm)}</span>${s.nm}</div></td><td>${s.id}</td><td>${em}</td><td><b style="color:${ac}">${s.att}%</b></td><td>${s.score.toFixed(1)}</td><td>${pill(s.std,s.std==='p-ok'?'On track':s.std==='p-warn'?'Watch':'At risk')}</td></tr>`;}).join('')}
-  </tbody></table></div>`:'<div class="muted" style="padding:18px 0;text-align:center">No students enrolled in this course yet.</div>'}
+    return `<tr data-goto="student" data-sid="${s.id}" data-back="students"><td class="nm"><div style="display:flex;align-items:center;gap:12px"><span class="ava">${initials(s.nm)}</span>${s.nm}</div></td><td>${s.id}</td><td>${em}</td><td><b style="color:${ac}">${s.att}%</b></td><td>${pill(s.std,s.std==='p-ok'?'On track':s.std==='p-warn'?'Watch':'At risk')}</td></tr>`;}).join('')}
+  </tbody></table></div>`:'<div class="muted" style="padding:18px 0;text-align:center">No students enrolled in this batch yet.</div>'}
 </div>`;};
 
 V.student=()=>{
   const s=STUDENTS.find(x=>x.id===SELSTU)||STUDENTS[0];
   const em=s.nm.toLowerCase().replace(/ /g,'.').replace(/[^a-z.]/g,'')+'.'+s.id+'@ltpct.local';
   const ac=s.att>=75?'var(--ok)':s.att>=50?'var(--warn)':'var(--bad)';
-  const scoreRows=[['Safety & PPE MCQ','Multiple choice','36 / 40','p-ok','Passed'],['Weld Symbols Quiz','Multiple choice','40 / 48','p-ok','Passed'],['Arc Welding Fundamentals','Multiple choice','—','p-neu','Not attempted']];
+  const stuBatch='2022-Welder';
+  const stuActs=ACTIVITIES.filter(a=>a.batch===stuBatch);
+  const stuForms=FORMS.filter(f=>f.batch===stuBatch);
   const forumLog=[];TOPICS.forEach(t=>t.replies.forEach(r=>{if(r.nm===s.nm)forumLog.push({topic:t.t,batch:t.batch,text:r.mt,rating:r.rating});}));
   const forumRated=forumLog.filter(f=>f.rating>0);
   return `
@@ -538,17 +552,20 @@ V.student=()=>{
   <div style="flex:1;min-width:180px"><h2 style="font-size:var(--fs-pg);font-weight:700">${s.nm}</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">ID ${s.id} · 2022-Welder · Section A · ${em}</div></div>
   <div class="muted" style="font-size:var(--fs-meta);text-align:right">Mentor<br><b style="color:var(--ink);font-size:var(--fs-body)">You (Mateen Shaikh)</b></div>
 </div>
-<div class="infobox">${ic('info')}<div class="im"><b>Consolidated learner record.</b> This joins MCQ results, mentoring history and discussion-forum merit into one profile — scores are never shown in isolation (FRD FR-4.5).</div></div>
+<div class="infobox">${ic('info')}<div class="im"><b>Consolidated learner record.</b> This joins activity submissions, pre / post-test responses, mentoring history and discussion-forum engagement into one profile — there is no grading (FRD FR-4.5).</div></div>
 <div class="stats">
   <div class="stat"><span class="chip" style="background:${s.att>=75?'var(--ok-bg)':'var(--warn-bg)'};color:${ac}">${ic('check')}</span><div><div class="v">${s.att}%</div><div class="k">Attendance</div></div></div>
-  <div class="stat">${chip('c-lav','award')}<div><div class="v">${s.score.toFixed(1)}</div><div class="k">Avg assessment</div></div></div>
+  <div class="stat">${chip('c-amber','clip')}<div><div class="v">${stuActs.length}</div><div class="k">Activities</div></div></div>
   <div class="stat">${chip('c-sky','handshake')}<div><div class="v">${s.ses}</div><div class="k">Mentoring sessions</div></div></div>
-  <div class="stat">${chip('c-amber','star')}<div><div class="v">${s.merit}<span style="font-size:14px;color:var(--muted)">/5</span></div><div class="k">Forum merit</div></div></div>
+  <div class="stat">${chip('c-lav','star')}<div><div class="v">${forumRated.length}</div><div class="k">Forum replies rated</div></div></div>
 </div>
 <div class="card">
-  <div class="tabs" data-tabs="stu"><button class="active" data-p="asmt">Assessments</button><button data-p="ment">Mentoring</button><button data-p="frm">Forum merit</button></div>
-  <div data-body="asmt"><table class="tbl"><thead><tr><th>Assessment</th><th>Type</th><th>Score</th><th>Result</th></tr></thead><tbody>
-    ${scoreRows.map(r=>`<tr><td class="nm">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${pill(r[3],r[4])}</td></tr>`).join('')}
+  <div class="tabs" data-tabs="stu"><button class="active" data-p="asmt">Activities</button><button data-p="tst">Pre / Post test</button><button data-p="ment">Mentoring</button><button data-p="frm">Forum merit</button></div>
+  <div data-body="asmt"><table class="tbl"><thead><tr><th>Activity</th><th>Upload type</th><th>Status</th></tr></thead><tbody>
+    ${stuActs.length?stuActs.map((a,i)=>`<tr><td class="nm">${a.title}</td><td>${a.type}</td><td>${pill(a.submitted>0&&i<stuActs.length-1?'p-ok':'p-neu',a.submitted>0&&i<stuActs.length-1?'Submitted':'Pending')}</td></tr>`).join(''):'<tr><td colspan="3" class="muted" style="text-align:center;padding:16px 0">No activities assigned to this batch yet.</td></tr>'}
+  </tbody></table></div>
+  <div data-body="tst" style="display:none"><table class="tbl"><thead><tr><th>Form</th><th>Type</th><th>Status</th><th></th></tr></thead><tbody>
+    ${stuForms.length?stuForms.map(f=>`<tr><td class="nm">${f.title}</td><td>${pill(f.kind==='Pre-test'?'p-info':'p-ok',f.kind)}</td><td>${pill(f.responses>0?'p-ok':'p-neu',f.responses>0?'Responded':'Not yet')}</td><td style="text-align:right">${f.responses>0?'<button class="btn btn-o btn-sm" data-formview="'+f.id+':0">'+ic('eye')+' View</button>':''}</td></tr>`).join(''):'<tr><td colspan="4" class="muted" style="text-align:center;padding:16px 0">No pre / post-test forms for this batch yet.</td></tr>'}
   </tbody></table></div>
   <div data-body="ment" style="display:none">
     ${s.ses>0?SESLOG.filter(x=>x[1]===s.nm).concat(s.ses>1?[['12 May 2026',s.nm,'Introductory mentoring session and goal setting','Present']]:[]).map(x=>lrow(x[0],x[2],pill('p-ok',x[3]))).join('')||lrow('No sessions in current view','Earlier sessions accumulate in the longitudinal profile',pill('p-neu','—')):'<div class="muted" style="padding:8px 0">No mentoring sessions logged yet. Use Mentoring → Log session.</div>'}
@@ -589,12 +606,13 @@ function courseContent(c){
     '<div id="cc-list">'+renderContentItems(CONTENT[c.id]||[])+'</div>';
 }
 function courseAssess(c){
-  const tests=TESTS.map((t,i)=>({t,i})).filter(x=>x.t.batch===c.name);
-  const body=tests.length?'<div class="scroll-x"><table class="tbl"><thead><tr><th>Assessment</th><th>Questions</th><th>Marks</th><th>Window</th><th>Status</th><th></th></tr></thead><tbody>'+
-    tests.map(({t,i})=>'<tr><td class="nm">'+t.nm+'</td><td>'+t.qs+'</td><td>'+t.marks+'</td><td>'+t.win+'</td><td>'+pill(t.status==='Published'?'p-ok':'p-neu',t.status)+'</td>'+
-      '<td style="text-align:right;white-space:nowrap"><button class="btn btn-o btn-sm" data-subs="'+i+'">'+ic('users')+' Submissions</button> <button class="btn btn-o btn-sm" data-edittest="'+i+'" data-back="course">'+ic('edit')+' Edit</button></td></tr>').join('')+
-    '</tbody></table></div>':'<div class="muted" style="padding:20px 0;text-align:center">No assessments yet for this course.</div>';
-  return '<div class="head"><h3>Assessments</h3><button class="btn btn-p btn-sm" data-newtest data-back="course" data-course="'+c.name+'">'+ic('plus')+' Create assessment</button></div>'+body;
+  const acts=ACTIVITIES.filter(a=>a.batch===c.name);
+  const forms=FORMS.filter(f=>f.batch===c.name);
+  let body='<div style="font-weight:600;margin:4px 0 4px">Activities</div>';
+  body+=acts.length?acts.map(actRow).join(''):'<div class="muted" style="padding:14px 0">No activities for this batch yet.</div>';
+  body+='<div style="font-weight:600;margin:20px 0 4px">Pre &amp; Post test</div>';
+  body+=forms.length?forms.map(formRow).join(''):'<div class="muted" style="padding:14px 0">No pre / post-test forms for this batch yet.</div>';
+  return '<div class="head"><h3>Activities</h3><button class="btn btn-p btn-sm" data-goto="assess">'+ic('arr')+' Open Activities module</button></div>'+body;
 }
 function courseDiscussions(c){
   const items=TOPICS.map((t,i)=>({t,i})).filter(o=>o.t.batch===c.name);
@@ -642,7 +660,7 @@ V.course=()=>{
   const c=CLASSES.find(x=>x.id===CURCLASS)||CLASSES[0];
   const ac=c.att>=75?'var(--ok)':c.att>=50?'var(--warn)':'var(--bad)';
   return `
-<a class="link" data-goto="courses" style="margin-bottom:16px">${ic('arrl')} Back to my courses</a>
+<a class="link" data-goto="courses" style="margin-bottom:16px">${ic('arrl')} Back to my batch</a>
 <div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
   ${chip(c.chip,c.ic)}
   <div style="flex:1;min-width:180px"><h2 style="font-size:var(--fs-pg);font-weight:700">${c.name}${c.upcoming?'<span class="cc-badge">Upcoming</span>':''}</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">Section ${c.sec||'—'} · ${c.students} student${c.students===1?'':'s'} · Welder trade</div></div>
@@ -651,8 +669,8 @@ V.course=()=>{
 <div class="card">
   <div class="tabs" data-tabs="course">
     <button class="active" data-p="students">Students</button>
-    <button data-p="content">Course Content</button>
-    <button data-p="assess">Assessments</button>
+    <button data-p="content">Batch Content</button>
+    <button data-p="assess">Activities</button>
     <button data-p="disc">Discussion Forum</button>
   </div>
   <div data-body="students">${courseStudents(c)}</div>
@@ -732,24 +750,92 @@ V.qbank=()=>`
   </div>
 </div>`;
 
+function actRow(a){return `<div class="lrow"><span class="chip c-amber" style="width:38px;height:38px;border-radius:10px">${ic('clip')}</span><div style="flex:1;min-width:0"><div class="nm">${a.title}</div><div class="mt" style="line-height:1.5">${a.brief}</div><div class="muted" style="font-size:var(--fs-meta);margin-top:4px">${a.batch} · upload type: ${a.type}</div></div><div style="text-align:right;flex:none">${pill(a.submitted>0?'p-ok':'p-neu',a.submitted+' / '+a.total+' submitted')}<div style="margin-top:8px"><button class="btn btn-o btn-sm" data-actsubs="${a.id}">${ic('users')} View submissions</button></div></div></div>`;}
+function formRow(f){return `<div class="lrow"><span class="chip ${f.kind==='Pre-test'?'c-sky':'c-green'}" style="width:38px;height:38px;border-radius:10px">${ic('doc')}</span><div style="flex:1;min-width:0"><div class="nm">${f.title}</div><div class="mt">${f.batch} · ${f.questions.length} questions</div></div>${pill(f.kind==='Pre-test'?'p-info':'p-ok',f.kind)}<div style="text-align:right;flex:none;margin-left:10px"><div class="muted" style="font-size:var(--fs-meta)">${f.responses} / ${f.total} responded</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-o btn-sm" data-formprev="${f.id}">${ic('eye')} Preview</button><button class="btn btn-o btn-sm" data-formresp="${f.id}">Responses</button></div></div></div>`;}
 V.assess=()=>`
 <div class="card">
-  <div class="tabs" data-tabs="asx"><button class="active" data-p="tests">MCQ tests</button><button data-p="results">Results & scoring</button></div>
-  <div data-body="tests">
-    <div class="head" style="flex-wrap:wrap;gap:10px"><h3>MCQ tests</h3>
-      <div style="display:flex;gap:10px;margin-left:auto;flex-wrap:wrap;align-items:center">
-        <div class="field" style="margin:0;min-width:180px"><select data-testfilter><option value="">All courses</option>${CLASSES.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join('')}</select></div>
-        <button class="btn btn-p btn-sm" data-newtest data-back="assess" id="tests-create">${ic('plus')} Create test</button>
-      </div>
-    </div>
-    <div class="muted" style="font-size:var(--fs-meta);margin-bottom:10px">Filter by course, or select a test to view its questions.</div>
-    <div id="tests-body"></div>
+  <div class="tabs" data-tabs="asx"><button class="active" data-p="acts">Activities</button><button data-p="forms">Pre &amp; Post test</button></div>
+  <div data-body="acts">
+    <div class="head" style="flex-wrap:wrap;gap:10px"><h3>Activities</h3><button class="btn btn-p btn-sm" data-newact>${ic('plus')} New activity</button></div>
+    <div class="infobox" style="margin-top:0">${ic('info')}<div class="im"><b>Set a task, review what comes in.</b> Each activity carries a brief; trainees upload their submission (PDF, video or document). There is no scoring — open a submission to review it.</div></div>
+    ${ACTIVITIES.map(actRow).join('')}
   </div>
-  <div data-body="results" style="display:none">
-    <div class="infobox" style="margin-top:0">${ic('info')}<div class="im"><b>Online + manual scoring.</b> Online attempts are auto-scored; use <b>Enter score</b> for offline attempts (FR-4.3). Results roll up per course (FR-4.4).</div></div>
-    <div id="res-body"></div>
+  <div data-body="forms" style="display:none">
+    <div class="head" style="flex-wrap:wrap;gap:10px"><h3>Pre &amp; Post test</h3><button class="btn btn-p btn-sm" data-newform>${ic('plus')} New form</button></div>
+    <div class="infobox" style="margin-top:0">${ic('info')}<div class="im"><b>Knowledge check, not a grade.</b> A <b>Pre-test</b> runs at the start of a batch to gauge where trainees stand; a <b>Post-test</b> runs at the end to see what they have gained. Review responses to understand each learner — nothing is scored.</div></div>
+    ${FORMS.map(formRow).join('')}
   </div>
 </div>`;
+
+/* ---------- ACTIVITIES + PRE/POST TEST helpers ---------- */
+function openNewAct(){
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">New activity</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div>'+
+    '<div class="field"><label>Title</label><input id="na-title" placeholder="e.g. Weld bead practice log"></div>'+
+    '<div class="rowf"><div class="field"><label>Batch</label><select id="na-batch">'+CLASSES.map(c=>'<option>'+c.name+'</option>').join('')+'</select></div><div class="field"><label>Submission type</label><select id="na-type"><option>PDF</option><option>Doc</option><option>Video</option></select></div></div>'+
+    '<div class="field"><label>Brief</label><textarea id="na-brief" placeholder="Explain what the trainee should do and what to upload..."></textarea></div>'+
+    '<div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-newact-save>Create activity</button></div></div>');
+}
+function openActSubs(id){
+  const a=ACTIVITIES.find(x=>x.id===id);if(!a)return;const roster=STUDENTS.slice(0,10);
+  const ext=a.type==='Video'?'mp4':a.type==='PDF'?'pdf':'docx';
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">Submissions · '+a.title+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div>'+
+    '<div class="muted" style="font-size:var(--fs-meta);margin-bottom:10px">'+a.batch+' · '+a.submitted+' of '+a.total+' submitted · upload type '+a.type+' · review only, no scoring</div>'+
+    '<div style="max-height:56vh;overflow:auto"><table class="tbl"><thead><tr><th>Student</th><th>Status</th><th>File</th><th></th></tr></thead><tbody>'+
+    roster.map((s,i)=>{const done=a.submitted>0&&i<Math.min(a.submitted,roster.length);const fn=s.nm.split(' ')[0].toLowerCase()+'-submission.'+ext;
+      return '<tr><td class="nm">'+s.nm+'</td><td>'+(done?pill('p-ok','Submitted'):pill('p-neu','Pending'))+'</td><td class="muted">'+(done?fn:'—')+'</td><td style="text-align:right">'+(done?'<button class="btn btn-o btn-sm" data-actfile>'+ic('eye')+' View</button>':'')+'</td></tr>';}).join('')+
+    '</tbody></table></div><div class="mbtns"><button class="btn btn-o" data-mclose>Close</button></div></div>');
+}
+function openFormPreview(id){
+  const f=FORMS.find(x=>x.id===id);if(!f)return;
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">Preview · '+f.title+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div>'+
+    '<div class="muted" style="font-size:var(--fs-meta);margin-bottom:12px">'+f.kind+' · '+f.batch+' · this is how trainees see the form</div>'+
+    '<div style="max-height:60vh;overflow:auto">'+f.questions.map((q,qi)=>'<div style="padding:12px 0;border-bottom:1px solid var(--line)"><div style="font-weight:500">'+(qi+1)+'. '+q.q+'</div>'+(q.t==='mcq'?'<div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">'+q.opts.map(o=>'<label class="lrow" style="border:none;padding:3px 0;cursor:default"><span class="ck" style="pointer-events:none">'+ic('tick')+'</span><span>'+o+'</span></label>').join('')+'</div>':'<div style="margin-top:8px;border:1px solid var(--line);border-radius:9px;background:var(--soft);height:58px"></div>')+'</div>').join('')+'</div>'+
+    '<div class="mbtns"><button class="btn btn-o" data-mclose>Close</button></div></div>');
+}
+function openFormResponses(id){
+  const f=FORMS.find(x=>x.id===id);if(!f)return;const roster=STUDENTS.slice(0,10);
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">Responses · '+f.title+'</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div>'+
+    '<div class="muted" style="font-size:var(--fs-meta);margin-bottom:10px">'+f.kind+' · '+f.batch+' · '+f.responses+' of '+f.total+' responded · review only, not scored</div>'+
+    '<div style="max-height:56vh;overflow:auto"><table class="tbl"><thead><tr><th>Student</th><th>Status</th><th></th></tr></thead><tbody>'+
+    roster.map((s,i)=>{const done=f.responses>0&&i<Math.min(f.responses,roster.length);
+      return '<tr><td class="nm">'+s.nm+'</td><td>'+(done?pill('p-ok','Responded'):pill('p-neu','Not yet'))+'</td><td style="text-align:right">'+(done?'<button class="btn btn-o btn-sm" data-formview="'+f.id+':'+i+'">'+ic('eye')+' View response</button>':'')+'</td></tr>';}).join('')+
+    '</tbody></table></div><div class="mbtns"><button class="btn btn-o" data-mclose>Close</button></div></div>');
+}
+const FORM_SAMPLE_TEXT=['I have some basic experience from helping at a local workshop.','I want to become confident with arc welding and reading drawings.','Still a little unsure about choosing the right shielding gas.'];
+function openFormView(fid,si){
+  const f=FORMS.find(x=>x.id===fid);if(!f)return;const s=STUDENTS.slice(0,10)[si];
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">'+(s?s.nm:'')+' · '+f.title+'</h3><button class="btn btn-o btn-sm" data-formresp="'+f.id+'">'+ic('arrl')+' Back</button></div>'+
+    '<div class="muted" style="font-size:var(--fs-meta);margin-bottom:12px">'+f.kind+' response · review only, not scored</div>'+
+    '<div style="max-height:56vh;overflow:auto">'+f.questions.map((q,qi)=>'<div class="qrow" style="align-items:flex-start"><span class="qn">'+(qi+1)+'.</span><div style="flex:1"><div style="font-weight:500">'+q.q+'</div><div class="mt" style="margin-top:4px">Answer: <b>'+(q.t==='mcq'?q.opts[(si+qi)%q.opts.length]:FORM_SAMPLE_TEXT[qi%FORM_SAMPLE_TEXT.length])+'</b></div></div>'+pill(q.t==='mcq'?'p-info':'p-neu',q.t==='mcq'?'Choice':'Open text')+'</div>').join('')+'</div>'+
+    '<div class="mbtns"><button class="btn btn-o" data-formresp="'+f.id+'">Back to responses</button></div></div>');
+}
+V.formnew=()=>`
+<a class="link" data-goto="assess" style="margin-bottom:16px">${ic('arrl')} Back to activities</a>
+<div class="card" style="margin-bottom:20px">
+  <div class="head"><h3>New Pre / Post test form</h3><button class="btn btn-p btn-sm" data-form-publish>${ic('check')} Publish form</button></div>
+  <div class="rowf">
+    <div class="field"><label>Form type</label><select id="fb-kind">${['Pre-test','Post-test'].map(k=>'<option'+(k===FORMDRAFT.kind?' selected':'')+'>'+k+'</option>').join('')}</select></div>
+    <div class="field"><label>Batch</label><select id="fb-batch">${CLASSES.map(c=>'<option>'+c.name+'</option>').join('')}</select></div>
+  </div>
+  <div class="field" style="margin:0"><label>Form title</label><input id="fb-title" placeholder="e.g. Welder — entry knowledge check"></div>
+</div>
+<div class="card">
+  <div class="head"><h3>Questions <span class="muted" id="fq-count" style="font-weight:500"></span></h3><button class="btn btn-p btn-sm" data-form-addq>${ic('plus')} Add question</button></div>
+  <div id="fq-list"></div>
+  <div class="infobox" style="margin-top:14px">${ic('info')}<div class="im">Add multiple-choice or open-text questions. These forms are <b>not scored</b> — they capture where each trainee stands at the start or end of the batch.</div></div>
+</div>`;
+function renderFormQ(){
+  const el=document.getElementById('fq-list');if(!el)return;
+  const cnt=document.getElementById('fq-count');if(cnt)cnt.textContent=FORMDRAFT.qs.length?('· '+FORMDRAFT.qs.length):'';
+  el.innerHTML=FORMDRAFT.qs.length?FORMDRAFT.qs.map((q,i)=>'<div class="qrow" style="align-items:flex-start"><span class="qn">'+(i+1)+'.</span><div style="flex:1"><div style="font-weight:500">'+q.q+'</div>'+(q.t==='mcq'?'<div class="mt" style="margin-top:4px">'+q.opts.map(o=>'○ '+o).join('&nbsp;&nbsp;&nbsp;')+'</div>':'<div class="mt" style="margin-top:4px">Open-text answer</div>')+'</div><span class="pill '+(q.t==='mcq'?'p-info':'p-neu')+'">'+(q.t==='mcq'?'Multiple choice':'Open text')+'</span><button class="btn btn-o btn-sm" data-form-delq="'+i+'" style="margin-left:8px">'+ic('x')+'</button></div>').join(''):'<div class="muted" style="padding:16px 0;text-align:center">No questions yet — add multiple-choice or open-text questions.</div>';
+}
+function openFormQModal(){
+  openModal('<div class="mbox wide"><div class="head"><h3 style="font-size:var(--fs-sec)">Add question</h3><button class="btn btn-o btn-sm" data-mclose>'+ic('x')+'</button></div>'+
+    '<div class="field"><label>Question</label><textarea id="fq-q" placeholder="Type the question..."></textarea></div>'+
+    '<div class="field"><label>Answer type</label><select id="fq-type"><option value="mcq">Multiple choice</option><option value="text">Open text</option></select></div>'+
+    '<div class="field" style="margin:0"><label>Options — one per line <span class="muted">(ignored for open text)</span></label><textarea id="fq-opts" placeholder="Option A\nOption B\nOption C"></textarea></div>'+
+    '<div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-formq-save>Add question</button></div></div>');
+}
 
 V.testview=()=>{
   const t=TESTS[SELTEST]||TESTS[0];
@@ -1017,9 +1103,9 @@ function csp(s){return {Open:'p-warn','In progress':'p-info',Resolved:'p-ok',Clo
 let SELSTU=1094;
 const NAV=[
   ['home','home','Home'],
-  ['courses','book','My Courses'],
+  ['courses','book','My Batch'],
   ['students','users','My Students'],
-  ['assess','clip','Assessments'],
+  ['assess','clip','Activities'],
   ['attend','calchk','Attendance'],
   ['mentor','handshake','Mentoring'],
   ['forum','chat','Discussion Forum'],
@@ -1029,14 +1115,14 @@ const NAV=[
   ]}
 ];
 const T={
-  home:['Home','Faculty overview'],courses:['My Courses',''],course:['Course','My Courses › Course'],students:['My Students',''],student:['Student Record','My Students › Learner'],
-  content:['Course Content',''],qbank:['Question Bank',''],assess:['Assessments',''],
+  home:['Home','Faculty overview'],courses:['My Batch',''],course:['Batch','My Batch › Batch'],students:['My Students',''],student:['Student Record','My Students › Learner'],
+  content:['Batch Content',''],qbank:['Question Bank',''],assess:['Activities',''],
   attend:['Attendance',''],markatt:['Mark Attendance','Attendance › Session'],mentor:['Mentoring',''],
   forum:['Discussion Forum',''],timetable:['Timetable',''],raise:['Raise a Case',''],profile:['My Profile',''],
-  testview:['MCQ Test','Assessments › View'],testnew:['Test Builder','Assessments › Create'],
+  testview:['MCQ Test','Activities › View'],testnew:['Test Builder','Activities › Create'],formnew:['New Form','Activities › New form'],
   casedetail:['Case Details','Raise a Case › Case']
 };
-const NAVMAP={student:'students',markatt:'attend',testview:'assess',testnew:'assess',casedetail:'raise',course:'courses'};
+const NAVMAP={student:'students',markatt:'attend',testview:'assess',testnew:'assess',formnew:'assess',casedetail:'raise',course:'courses'};
 let SELTEST=0,TESTQ=[],TQEDIT=-1,SELCASE='4821',BACKTO='students',CEDIT=-1,SUBTEST=0,RESCOURSE=null,TESTFILTER='',TB_COURSE='',REMARKIDX=-1,ATTCOURSE='',ATTDATE='';
 
 const nav=document.getElementById('nav');
@@ -1066,7 +1152,7 @@ function render(id){
   document.getElementById('pg-crumb').textContent=(T[id]||['',''])[1];
   if(id==='timetable')cal();
   if(id==='testnew')renderTestQ();
-  if(id==='assess'){RESCOURSE=null;TESTFILTER='';renderResults();renderTests();}
+  if(id==='formnew')renderFormQ();
   if(id==='attend'){ATTCOURSE='';ATTDATE='';renderAttHist();}
   scrollTo(0,0);
 }
@@ -1124,7 +1210,20 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-mclose]')){closeModal();return;}
   if(e.target.closest('[data-mconfirm]')){const a=modalAction;closeModal();if(a)a();return;}
 
-  // test builder
+  // activities + pre/post test
+  if(e.target.closest('[data-newact]')){openNewAct();return;}
+  const nas=e.target.closest('[data-newact-save]');if(nas){const ti=document.getElementById('na-title'),ba=document.getElementById('na-batch'),ty=document.getElementById('na-type'),br=document.getElementById('na-brief');const title=ti?ti.value.trim():'';if(!title){toast('c-amber','alert','Add a title','Give the activity a title before creating it.');return;}const bn=ba?ba.value:CLASSES[0].name;const cls=CLASSES.find(c=>c.name===bn);ACTIVITIES.unshift({id:Date.now(),title:title,batch:bn,type:ty?ty.value:'PDF',brief:br?br.value.trim():'',submitted:0,total:cls?cls.students:42});closeModal();render('assess');toast('c-green','check','Activity created','“'+title+'” is now open for submissions.');return;}
+  const asub=e.target.closest('[data-actsubs]');if(asub){openActSubs(parseInt(asub.dataset.actsubs,10));return;}
+  if(e.target.closest('[data-actfile]')){toast('c-sky','doc','Submission','This is a prototype — the trainee’s uploaded file would open here for review.');return;}
+  if(e.target.closest('[data-newform]')){FORMDRAFT={kind:'Pre-test',qs:[]};render('formnew');return;}
+  if(e.target.closest('[data-form-addq]')){openFormQModal();return;}
+  const fqs=e.target.closest('[data-formq-save]');if(fqs){const q=document.getElementById('fq-q'),ty=document.getElementById('fq-type'),op=document.getElementById('fq-opts');const qt=q?q.value.trim():'';if(!qt){toast('c-amber','alert','Add the question','Type the question text first.');return;}const type=ty?ty.value:'mcq';let opts=[];if(type==='mcq'){opts=(op?op.value:'').split('\n').map(s=>s.trim()).filter(Boolean);if(opts.length<2){toast('c-amber','alert','Add options','Multiple-choice needs at least two options (one per line).');return;}}FORMDRAFT.qs.push({t:type,q:qt,opts:opts});closeModal();renderFormQ();return;}
+  const fdq=e.target.closest('[data-form-delq]');if(fdq){FORMDRAFT.qs.splice(parseInt(fdq.dataset.formDelq,10),1);renderFormQ();return;}
+  if(e.target.closest('[data-form-publish]')){const ti=document.getElementById('fb-title'),ki=document.getElementById('fb-kind'),ba=document.getElementById('fb-batch');const title=ti?ti.value.trim():'';if(!title){toast('c-amber','alert','Add a title','Give the form a title before publishing.');return;}if(!FORMDRAFT.qs.length){toast('c-amber','alert','No questions','Add at least one question before publishing.');return;}const kind=ki?ki.value:'Pre-test';const bn=ba?ba.value:CLASSES[0].name;const cls=CLASSES.find(c=>c.name===bn);FORMS.unshift({id:Date.now(),kind:kind,batch:bn,title:title,responses:0,total:cls?cls.students:42,questions:FORMDRAFT.qs.slice()});confirmModal('c-green','check',kind+' published','“'+title+'” is live for '+bn+'. Trainees will see it '+(kind==='Pre-test'?'at the start':'at the end')+' of the batch.','Done',()=>render('assess'));return;}
+  const fpv=e.target.closest('[data-formprev]');if(fpv){openFormPreview(parseInt(fpv.dataset.formprev,10));return;}
+  const frv=e.target.closest('[data-formview]');if(frv){const p=frv.dataset.formview.split(':');openFormView(parseInt(p[0],10),parseInt(p[1],10));return;}
+  const frp=e.target.closest('[data-formresp]');if(frp){openFormResponses(parseInt(frp.dataset.formresp,10));return;}
+  // (legacy MCQ test builder — retained but no longer routed to)
   const nt=e.target.closest('[data-newtest]');if(nt){BACKTO=nt.dataset.back||'assess';TB_COURSE=nt.dataset.course||'';TESTQ=[];render('testnew');return;}
   // course content
   if(e.target.closest('[data-add-content]')){openContentModal();return;}
