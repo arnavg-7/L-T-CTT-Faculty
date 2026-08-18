@@ -789,10 +789,9 @@ function formRespInline(f){
   var roster=STUDENTS.slice(0,10);
   var rows=roster.map(function(s,i){
     var done=f.responses>0&&i<Math.min(f.responses,roster.length);
-    if(!done)return '<div class="acc"><div class="acc-h" style="cursor:default"><span class="ava" style="width:30px;height:30px;font-size:11px;flex:none">'+initials(s.nm)+'</span><span class="t">'+s.nm+'</span><span class="cnt">'+pill('p-neu','Not yet')+'</span></div></div>';
-    return '<div class="acc"><div class="acc-h"><span class="ava" style="width:30px;height:30px;font-size:11px;flex:none">'+initials(s.nm)+'</span><span class="t">'+s.nm+'</span><span class="cnt">'+pill('p-ok','Responded')+'</span>'+ic('cv','cv')+'</div><div class="acc-b">'+formAnswers(f,i)+'</div></div>';
+    return '<div class="lrow"><span class="ava" style="width:32px;height:32px;font-size:11px;flex:none">'+initials(s.nm)+'</span><div style="flex:1;min-width:0" class="nm">'+s.nm+'</div>'+(done?pill('p-ok','Responded'):pill('p-neu','Not yet'))+(done?'<button class="btn btn-o btn-sm" data-viewresp="'+f.id+':'+i+'" style="margin-left:12px">'+ic('eye')+' View response</button>':'')+'</div>';
   }).join('');
-  return '<div class="muted" style="font-size:var(--fs-meta);margin:6px 0 12px">'+f.responses+' of '+f.total+' responded · open a learner to read their answers · not scored</div>'+rows;
+  return '<div class="muted" style="font-size:var(--fs-meta);margin:6px 0 12px">'+f.responses+' of '+f.total+' responded · open a learner’s response to read their answers · not scored</div>'+rows;
 }
 function formRow(f){
   var kp=f.kind==='Pre-test'?'p-info':'p-ok';
@@ -853,6 +852,22 @@ function openFormResponses(id){
     '</tbody></table></div><div class="mbtns"><button class="btn btn-o" data-mclose>Close</button></div></div>');
 }
 const FORM_SAMPLE_TEXT=['I have some basic experience from helping at a local workshop.','I want to become confident with arc welding and reading drawings.','Still a little unsure about choosing the right shielding gas.'];
+V.formresp=()=>{
+  const f=FORMS.find(x=>x.id===FRESP_FID)||FORMS[0];
+  const s=STUDENTS.slice(0,10)[FRESP_SI]||STUDENTS[0];
+  return `
+<a class="link" data-formresp-back style="margin-bottom:16px">${ic('arrl')} Back to responses</a>
+<div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+  <span class="ava lg">${initials(s.nm)}</span>
+  <div style="flex:1;min-width:180px"><h2 style="font-size:var(--fs-pg);font-weight:700">${s.nm}</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">${f.kind} · ${f.title} · ${f.batch}</div></div>
+  ${pill(f.kind==='Pre-test'?'p-info':'p-ok',f.kind)}
+</div>
+<div class="infobox">${ic('info')}<div class="im">${s.nm.split(' ')[0]}’s ${f.kind.toLowerCase()} response. Pre / post-test forms are <b>not scored</b> — use this to understand where the learner stands.</div></div>
+<div class="card">
+  <div class="head"><h3>Answers</h3><span class="muted" style="font-size:var(--fs-meta)">${f.questions.length} questions</span></div>
+  ${formAnswers(f,FRESP_SI)}
+</div>`;
+};
 function openFormEdit(id){
   var idx=FORMS.findIndex(function(x){return x.id===id;});if(idx<0)return;var f=FORMS[idx];
   FORMEDIT=idx;
@@ -1178,11 +1193,11 @@ const T={
   content:['Artifacts',''],qbank:['Question Bank',''],assess:['Activities',''],
   attend:['Attendance',''],markatt:['Mark Attendance','Attendance › Session'],mentor:['Mentoring',''],
   forum:['Discussion Forum',''],timetable:['Timetable',''],raise:['Raise a Case',''],profile:['My Profile',''],
-  testview:['MCQ Test','Activities › View'],testnew:['Test Builder','Activities › Create'],formnew:['New Form','Activities › New form'],
+  testview:['MCQ Test','Activities › View'],testnew:['Test Builder','Activities › Create'],formnew:['New Form','Activities › New form'],formresp:['Response','Activities › Response'],
   casedetail:['Case Details','Raise a Case › Case']
 };
-const NAVMAP={student:'students',markatt:'attend',testview:'assess',testnew:'assess',formnew:'assess',casedetail:'raise',course:'courses'};
-let SELTEST=0,TESTQ=[],TQEDIT=-1,SELCASE='4821',BACKTO='students',CEDIT=-1,SUBTEST=0,RESCOURSE=null,TESTFILTER='',TB_COURSE='',REMARKIDX=-1,ATTCOURSE='',ATTDATE='',ACTCTX='assess',FORMEDIT=-1;
+const NAVMAP={student:'students',markatt:'attend',testview:'assess',testnew:'assess',formnew:'assess',formresp:'assess',casedetail:'raise',course:'courses'};
+let SELTEST=0,TESTQ=[],TQEDIT=-1,SELCASE='4821',BACKTO='students',CEDIT=-1,SUBTEST=0,RESCOURSE=null,TESTFILTER='',TB_COURSE='',REMARKIDX=-1,ATTCOURSE='',ATTDATE='',ACTCTX='assess',FORMEDIT=-1,FRESP_FID=-1,FRESP_SI=0;
 
 const nav=document.getElementById('nav');
 function navLink(id,i,l){const a=document.createElement('a');a.dataset.goto=id;a.innerHTML=ic(i)+'<span>'+l+'</span>';return a;}
@@ -1276,6 +1291,8 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-actfile]')){toast('c-sky','doc','Submission','This is a prototype — the trainee’s uploaded file would open here for review.');return;}
   const nform=e.target.closest('[data-newform]');if(nform){ACTCTX=nform.dataset.ctx||'assess';FORMEDIT=-1;FORMDRAFT={kind:'Pre-test',qs:[]};render('formnew');return;}
   const eform=e.target.closest('[data-editform]');if(eform){ACTCTX=document.querySelector('.tabs[data-tabs="course"]')?'course':'assess';openFormEdit(parseInt(eform.dataset.editform,10));return;}
+  const vresp=e.target.closest('[data-viewresp]');if(vresp){const p=vresp.dataset.viewresp.split(':');FRESP_FID=parseInt(p[0],10);FRESP_SI=parseInt(p[1],10);ACTCTX=document.querySelector('.tabs[data-tabs="course"]')?'course':'assess';render('formresp');return;}
+  if(e.target.closest('[data-formresp-back]')){if(ACTCTX==='course'){render('course');const tb=document.querySelector('.tabs[data-tabs="course"] button[data-p="assess"]');if(tb)tb.click();}else{render('assess');}return;}
   const fsub=e.target.closest('[data-ftab]');if(fsub){const scope=fsub.closest('.acc-b')||fsub.closest('.subtabs').parentElement;const key=fsub.dataset.ftab;scope.querySelectorAll('.subtabs button').forEach(b=>b.classList.toggle('active',b===fsub));scope.querySelectorAll('[data-fpanel]').forEach(p=>{if(p.closest('.acc-b')===scope)p.style.display=p.dataset.fpanel===key?'':'none';});return;}
   if(e.target.closest('[data-form-addq]')){openFormQModal();return;}
   const fqs=e.target.closest('[data-formq-save]');if(fqs){const q=document.getElementById('fq-q'),ty=document.getElementById('fq-type'),op=document.getElementById('fq-opts');const qt=q?q.value.trim():'';if(!qt){toast('c-amber','alert','Add the question','Type the question text first.');return;}const type=ty?ty.value:'mcq';let opts=[];if(type==='mcq'){opts=(op?op.value:'').split('\n').map(s=>s.trim()).filter(Boolean);if(opts.length<2){toast('c-amber','alert','Add options','Multiple-choice needs at least two options (one per line).');return;}}FORMDRAFT.qs.push({t:type,q:qt,opts:opts});closeModal();renderFormQ();return;}
