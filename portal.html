@@ -365,7 +365,7 @@ function initials(n){return n.split(' ').map(w=>w[0]).slice(0,2).join('').toUppe
 const CLASSES=[
   {id:'w2022',name:'2022-Welder',sec:'A',students:42,res:11,act:5,chip:'c-green',ic:'chip2',att:78},
   {id:'w2025',name:'2025-Welder',sec:'A',students:23,res:1,act:6,chip:'c-sky',ic:'tool',att:64},
-  {id:'demo',name:'Demo Course',sec:'1',students:1,res:0,act:0,chip:'c-lav',ic:'wifi',att:0,upcoming:true}
+  {id:'demo',name:'Demo Batch',sec:'1',students:1,res:0,act:0,chip:'c-lav',ic:'wifi',att:0,upcoming:true}
 ];
 const STUDENTS=[
   {id:1109,nm:'Ajaybhai Patel',att:0,score:5.4,merit:2,ses:1,std:'p-bad',crs:['w2022']},
@@ -409,7 +409,7 @@ const FORMS=[
   {id:0,kind:'Pre-test',batch:'2022-Welder',title:'Welder — entry knowledge check',responses:38,total:42,questions:[
     {t:'mcq',q:'Have you welded before joining this batch?',opts:['Never','A little','Regularly']},
     {t:'mcq',q:'Which of these do you think is essential before striking an arc?',opts:['Only gloves','Helmet, gloves and apron','No PPE is needed']},
-    {t:'text',q:'In your own words, what do you hope to learn in this course?'}
+    {t:'text',q:'In your own words, what do you hope to learn in this batch?'}
   ]},
   {id:1,kind:'Post-test',batch:'2022-Welder',title:'Welder — exit knowledge check',responses:0,total:42,questions:[
     {t:'mcq',q:'Which shielding gas is commonly used for TIG welding of aluminium?',opts:['Argon','Oxygen','CO2 only']},
@@ -565,7 +565,7 @@ V.student=()=>{
   const forumLog=[];TOPICS.forEach(t=>t.replies.forEach(r=>{if(r.nm===s.nm)forumLog.push({topic:t.t,batch:t.batch,text:r.mt,rating:r.rating});}));
   const forumRated=forumLog.filter(f=>f.rating>0);
   return `
-<a class="link" data-goto="${BACKTO==='course'?'course':'students'}" style="margin-bottom:16px">${ic('arrl')} Back to ${BACKTO==='course'?'course':'my students'}</a>
+<a class="link" data-goto="${BACKTO==='course'?'course':'students'}" style="margin-bottom:16px">${ic('arrl')} Back to ${BACKTO==='course'?'batch':'my students'}</a>
 <div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
   <span class="ava lg">${initials(s.nm)}</span>
   <div style="flex:1;min-width:180px"><h2 style="font-size:var(--fs-pg);font-weight:700">${s.nm}</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">ID ${s.id} · 2022-Welder · Section A · ${em}</div></div>
@@ -593,7 +593,7 @@ V.student=()=>{
     ${forumLog.length?`<div class="infobox">${ic('info')}<div class="im"><b>Discussion responses.</b> Every reply ${s.nm.split(' ')[0]} has posted to discussions across the forum — ${forumLog.length} in total.</div></div>`+forumLog.map(f=>`<div class="lrow"><span class="chip c-green" style="width:38px;height:38px;border-radius:10px">${ic('chat')}</span><div style="flex:1;min-width:0"><div class="nm">${f.topic}</div><div class="mt" style="line-height:1.5">“${f.text}”</div><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">${f.batch}</div></div></div>`).join(''):'<div class="muted" style="padding:18px 0;text-align:center">No discussion contributions from this learner yet.</div>'}
   </div>
   <div data-body="cert" style="display:none">
-    <div class="infobox">${ic('info')}<div class="im"><b>Certificates earned.</b> ${s.nm.split(' ')[0]} has earned ${CERTS.length} certificate${CERTS.length===1?'':'s'} by completing courses. Open any to view the PDF.</div></div>
+    <div class="infobox">${ic('info')}<div class="im"><b>Certificates earned.</b> ${s.nm.split(' ')[0]} has earned ${CERTS.length} certificate${CERTS.length===1?'':'s'} by completing batches. Open any to view the PDF.</div></div>
     ${CERTS.map(c=>`<div class="lrow"><span class="chip c-amber" style="width:38px;height:38px;border-radius:10px">${ic('award')}</span><div style="flex:1;min-width:0"><div class="nm">${c.course}</div><div class="mt">Issued ${c.date} · ${c.hours} training hours · ID ${c.id}</div></div><button class="btn btn-o btn-sm" data-viewcert="${c.id}">${ic('eye')} View certificate</button></div>`).join('')}
   </div>
 </div>`;};
@@ -625,7 +625,7 @@ function renderContentItems(items){
 function renderCourseContent(){const el=document.getElementById('cc-list');if(el)el.innerHTML=renderContentItems(CONTENT[CURCLASS]||[]);}
 function courseStudents(c){
   const list=STUDENTS.filter(s=>s.crs.includes(c.id));
-  if(!list.length)return '<div class="muted" style="padding:18px 0;text-align:center">No students enrolled in this course yet.</div>';
+  if(!list.length)return '<div class="muted" style="padding:18px 0;text-align:center">No students enrolled in this batch yet.</div>';
   return '<div class="head"><h3>Enrolled students</h3><div class="search" style="width:220px">'+ic('search')+'<input placeholder="'+list.length+' students..." data-search></div></div>'+
     '<div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Name</th><th>Reg ID</th><th>Attendance</th><th></th></tr></thead><tbody>'+
     list.map(s=>{const ac=s.att>=75?'var(--ok)':s.att>=50?'var(--warn)':'var(--bad)';
@@ -653,14 +653,14 @@ function courseAssess(c){
 function courseDiscussions(c){
   const items=TOPICS.map((t,i)=>({t,i})).filter(o=>o.t.batch===c.name);
   const head='<div class="head"><h3>Discussion forum</h3>'+(items.length?'<span class="muted" style="font-size:var(--fs-meta)">'+items.length+' discussion'+(items.length===1?'':'s')+' · select one to open it in the forum</span>':'')+'</div>';
-  if(!items.length)return head+'<div class="muted" style="padding:20px 0;text-align:center">No discussions for this course yet. Post one from the <b>Discussion Forum</b> module.</div>';
+  if(!items.length)return head+'<div class="muted" style="padding:20px 0;text-align:center">No discussions for this batch yet. Post one from the <b>Discussion Forum</b> module.</div>';
   return head+items.map(({t,i})=>{const ps=tposts(t),sc=tscored(t);
     return '<div class="lrow" data-goto-topic="'+i+'" style="cursor:pointer'+(t.closed?';opacity:.68':'')+'"><span class="chip c-green" style="width:38px;height:38px;border-radius:10px">'+ic('chat')+'</span><div style="flex:1;min-width:0"><div class="nm">'+t.t+'</div><div class="mt">'+ps+' response'+(ps===1?'':'s')+' · created by '+t.by+'</div></div>'+(t.closed?'<span class="pill" style="background:var(--line);color:var(--muted)">Closed</span>':(sc===ps&&ps>0?pill('p-ok','All rated'):pill('p-warn',(ps-sc)+' to rate')))+'<span class="link" style="flex:none">'+ic('arr')+'</span></div>';
   }).join('');
 }
 V.courses=()=>`
 <div class="card">
-  <div class="head"><h3>My courses</h3><span class="muted" style="font-size:var(--fs-meta)">${CLASSES.length} courses · select one to manage students, content &amp; assessments</span></div>
+  <div class="head"><h3>My Batch</h3><span class="muted" style="font-size:var(--fs-meta)">${CLASSES.length} batches · select one to manage students, content &amp; activities</span></div>
   <div class="grid g3">${CLASSES.map(clsCard).join('')}</div>
 </div>`;
 
@@ -682,14 +682,14 @@ function resCourseCard(c){
 function renderResults(){
   const el=document.getElementById('res-body');if(!el)return;
   if(!RESCOURSE){
-    el.innerHTML='<div class="muted" style="font-size:var(--fs-meta);margin-bottom:16px">Select a course to see its assessments and grades.</div><div class="grid g3">'+CLASSES.map(resCourseCard).join('')+'</div>';
+    el.innerHTML='<div class="muted" style="font-size:var(--fs-meta);margin-bottom:16px">Select a batch to see its activities.</div><div class="grid g3">'+CLASSES.map(resCourseCard).join('')+'</div>';
     return;
   }
   const c=CLASSES.find(x=>x.id===RESCOURSE)||CLASSES[0];
   const tests=TESTS.filter(t=>t.batch===c.name);
-  el.innerHTML='<a class="link" data-res-back style="margin-bottom:16px;display:inline-flex">'+ic('arrl')+' All courses</a>'+
+  el.innerHTML='<a class="link" data-res-back style="margin-bottom:16px;display:inline-flex">'+ic('arrl')+' All batches</a>'+
     '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'+chip(c.chip,c.ic)+'<div><div style="font-weight:600">'+c.name+'</div><div class="muted" style="font-size:var(--fs-meta)">Section '+(c.sec||'—')+' · '+tests.length+' assessment'+(tests.length===1?'':'s')+'</div></div></div>'+
-    (tests.length?tests.map((t,idx)=>'<div class="acc'+(idx===0?' open':'')+'"><div class="acc-h">'+chip('c-lav','clip')+'<span class="t">'+t.nm+'</span><span class="cnt">'+t.marks+' marks · '+t.attempts+'</span>'+pill(t.status==='Published'?'p-ok':'p-neu',t.status)+ic('cv','cv')+'</div><div class="acc-b">'+resGrades(t)+'</div></div>').join(''):'<div class="muted" style="padding:16px 0">No assessments for this course yet.</div>');
+    (tests.length?tests.map((t,idx)=>'<div class="acc'+(idx===0?' open':'')+'"><div class="acc-h">'+chip('c-lav','clip')+'<span class="t">'+t.nm+'</span><span class="cnt">'+t.marks+' marks · '+t.attempts+'</span>'+pill(t.status==='Published'?'p-ok':'p-neu',t.status)+ic('cv','cv')+'</div><div class="acc-b">'+resGrades(t)+'</div></div>').join(''):'<div class="muted" style="padding:16px 0">No activities for this batch yet.</div>');
 }
 
 V.course=()=>{
@@ -747,8 +747,8 @@ function openSubView(i){
 
 V.content=()=>`
 <div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-  <div class="field" style="margin:0;min-width:200px"><label>Term / Batch</label><select><option>2022-Welder</option><option>2025-Welder</option><option>Demo Course</option></select></div>
-  <div class="field" style="margin:0;min-width:200px"><label>Course</label><select><option>Welder — Section A</option><option>Welder — Section B</option></select></div>
+  <div class="field" style="margin:0;min-width:200px"><label>Term / Batch</label><select><option>2022-Welder</option><option>2025-Welder</option><option>Demo Batch</option></select></div>
+  <div class="field" style="margin:0;min-width:200px"><label>Section</label><select><option>Welder — Section A</option><option>Welder — Section B</option></select></div>
 </div>
 <div class="grid g2e">
   <div class="card">
@@ -1001,7 +1001,7 @@ V.attend=()=>`
   <div data-body="hist" style="display:none">
     <div class="head" style="flex-wrap:wrap;gap:10px"><h3>Attendance history</h3>
       <div style="display:flex;gap:12px;margin-left:auto;flex-wrap:wrap;align-items:flex-end">
-        <div class="field" style="margin:0;min-width:170px"><label>Course</label><select data-attcourse><option value="">All courses</option>${CLASSES.map(c=>'<option>'+c.name+'</option>').join('')}</select></div>
+        <div class="field" style="margin:0;min-width:170px"><label>Batch</label><select data-attcourse><option value="">All batches</option>${CLASSES.map(c=>'<option>'+c.name+'</option>').join('')}</select></div>
         <div class="field" style="margin:0"><label>Date</label><input type="date" data-attdate></div>
       </div>
     </div>
@@ -1171,7 +1171,7 @@ function attMarks(i){const h=ATTHIST[i];const cid=(CLASSES.find(c=>c.name===h.co
 function renderAttHist(){
   const el=document.getElementById('atthist-body');if(!el)return;
   const rows=ATTHIST.map((h,i)=>({h,i})).filter(x=>(!ATTCOURSE||x.h.course===ATTCOURSE)&&(!ATTDATE||x.h.date===ATTDATE));
-  el.innerHTML=rows.length?'<div class="scroll-x"><table class="tbl"><thead><tr><th>Date</th><th>Course</th><th>Session</th><th>Present</th><th>Absent</th><th></th></tr></thead><tbody>'+
+  el.innerHTML=rows.length?'<div class="scroll-x"><table class="tbl"><thead><tr><th>Date</th><th>Batch</th><th>Session</th><th>Present</th><th>Absent</th><th></th></tr></thead><tbody>'+
     rows.map(x=>{const m=attMarks(x.i);const pres=m.filter(a=>a[1]==='Present').length;
       return '<tr data-atthist="'+x.i+'" style="cursor:pointer"><td class="nm">'+fmtDate(x.h.date)+'</td><td>'+x.h.course+'</td><td>'+x.h.session+'</td><td><b style="color:var(--ok)">'+pres+'</b></td><td><b style="color:var(--bad)">'+(m.length-pres)+'</b></td><td style="text-align:right"><span class="link">View '+ic('arr')+'</span></td></tr>';}).join('')+'</tbody></table></div>':'<div class="muted" style="padding:18px 0;text-align:center">No attendance records'+(ATTCOURSE?' for '+ATTCOURSE:'')+(ATTDATE?' on '+fmtDate(ATTDATE):'')+'.</div>';
 }
@@ -1181,7 +1181,7 @@ function openAttDetail(i){const h=ATTHIST[i];const m=attMarks(i);const pres=m.fi
 function renderTests(){
   const el=document.getElementById('tests-body');if(!el)return;
   const tests=TESTS.map((t,i)=>({t,i})).filter(x=>!TESTFILTER||x.t.batch===TESTFILTER);
-  el.innerHTML=tests.length?'<div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Test</th><th>Course</th><th>Questions</th><th>Marks</th><th>Window</th><th>Attempts</th><th>Status</th></tr></thead><tbody>'+
+  el.innerHTML=tests.length?'<div class="scroll-x"><table class="tbl" data-searchtable><thead><tr><th>Test</th><th>Batch</th><th>Questions</th><th>Marks</th><th>Window</th><th>Attempts</th><th>Status</th></tr></thead><tbody>'+
     tests.map(x=>'<tr data-goto="testview" data-tid="'+x.i+'" data-back="assess"><td class="nm">'+x.t.nm+'</td><td>'+x.t.batch+'</td><td>'+x.t.qs+'</td><td>'+x.t.marks+'</td><td>'+x.t.win+'</td><td>'+x.t.attempts+'</td><td>'+pill(x.t.status==='Published'?'p-ok':'p-neu',x.t.status)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="muted" style="padding:18px 0;text-align:center">No MCQ tests'+(TESTFILTER?' for '+TESTFILTER:'')+' yet — create one.</div>';
 }
 function scheduleForm(nm){const link='meet.ctt/'+Math.random().toString(36).slice(2,6)+'-'+Math.random().toString(36).slice(2,6);
