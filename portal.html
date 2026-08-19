@@ -521,17 +521,22 @@ let CURCLASS='w2022';
 /* ---------- VIEWS ---------- */
 const V={};
 
-V.home=()=>`
+V.home=()=>{
+  const aSub=ACTIVITIES.reduce((s,a)=>s+a.submitted,0);
+  const aTot=ACTIVITIES.reduce((s,a)=>s+a.total,0);
+  const aPct=aTot?Math.round(aSub/aTot*100):0;
+  return `
 <div class="stats">
   <div class="stat">${chip('c-sky','users')}<div><div class="v">3</div><div class="k">My Batch</div></div></div>
   <div class="stat">${chip('c-green','user')}<div><div class="v">1,286</div><div class="k">Total students · all LMS</div></div></div>
   <div class="stat">${chip('c-lav','calchk')}<div><div class="v">1030</div><div class="k">Sessions · 5 conducted</div></div></div>
-  <div class="stat">${chip('c-amber','clip')}<div><div class="v">4</div><div class="k">Pending activities</div></div></div>
+  <div class="stat">${chip('c-amber','clip')}<div><div class="v">${aPct}%</div><div class="k">Artifacts submitted</div></div></div>
 </div>
 <div class="card">
   <div class="head"><h3>My Batch</h3><a class="link" data-goto="students">My students ${ic('arr')}</a></div>
   <div class="grid g3">${CLASSES.map(clsCard).join('')}</div>
 </div>`;
+};
 
 V.students=()=>{
   const c=CLASSES.find(x=>x.id===CURCLASS)||CLASSES[0];
