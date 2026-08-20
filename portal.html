@@ -641,14 +641,18 @@ function openNewLesson(){
     '<div class="field" style="margin:0"><label>Lesson name</label><input id="nl-name" placeholder="e.g. Gas Metal Arc Welding"></div>'+
     '<div class="mbtns"><button class="btn btn-o" data-mclose>Cancel</button><button class="btn btn-p" data-newlesson-save>Add lesson</button></div></div>');
 }
-function courseAssess(c){
+function courseActivities(c){
   const acts=ACTIVITIES.filter(a=>a.batch===c.name);
+  let body='<div class="head"><h3>Activities</h3><button class="btn btn-p btn-sm" data-newact data-ctx="course">'+ic('plus')+' New activity</button></div>';
+  body+=acts.length?acts.map(actRow).join(''):'<div class="muted" style="padding:16px 0;text-align:center">No activities for this batch yet — use <b>New activity</b> to add one.</div>';
+  return body;
+}
+function courseForms(c){
   const forms=FORMS.filter(f=>f.batch===c.name);
-  let body='<div class="head" style="margin-top:6px"><h4 style="font-weight:600">Activities</h4><button class="btn btn-o btn-sm" data-newact data-ctx="course">'+ic('plus')+' New activity</button></div>';
-  body+=acts.length?acts.map(actRow).join(''):'<div class="muted" style="padding:14px 0">No activities for this batch yet.</div>';
-  body+='<div class="head" style="margin-top:20px"><h4 style="font-weight:600">Pre &amp; Post test</h4><button class="btn btn-o btn-sm" data-newform data-ctx="course">'+ic('plus')+' New form</button></div>';
-  body+=forms.length?forms.map(formRow).join(''):'<div class="muted" style="padding:14px 0">No pre / post-test forms for this batch yet.</div>';
-  return '<div class="head"><h3>Activities</h3></div>'+body;
+  let body='<div class="head"><h3>Pre &amp; Post test</h3><button class="btn btn-p btn-sm" data-newform data-ctx="course">'+ic('plus')+' New form</button></div>';
+  body+='<div class="infobox" style="margin-top:0">'+ic('info')+'<div class="im"><b>Set up this batch’s knowledge forms.</b> A <b>Pre-test</b> runs at the start of the batch and a <b>Post-test</b> at the end — ungraded. Open one to preview it or review responses.</div></div>';
+  body+=forms.length?forms.map(formRow).join(''):'<div class="muted" style="padding:16px 0;text-align:center">No pre / post-test forms for this batch yet — use <b>New form</b> to set one up.</div>';
+  return body;
 }
 function courseDiscussions(c){
   const items=TOPICS.map((t,i)=>({t,i})).filter(o=>o.t.batch===c.name);
@@ -707,11 +711,13 @@ V.course=()=>{
     <button class="active" data-p="students">Students</button>
     <button data-p="content">Artifacts</button>
     <button data-p="assess">Activities</button>
+    <button data-p="tests">Pre / Post test</button>
     <button data-p="disc">Discussion Forum</button>
   </div>
   <div data-body="students">${courseStudents(c)}</div>
   <div data-body="content" style="display:none">${courseContent(c)}</div>
-  <div data-body="assess" style="display:none">${courseAssess(c)}</div>
+  <div data-body="assess" style="display:none">${courseActivities(c)}</div>
+  <div data-body="tests" style="display:none">${courseForms(c)}</div>
   <div data-body="disc" style="display:none">${courseDiscussions(c)}</div>
 </div>`;
 };
@@ -1395,13 +1401,13 @@ document.addEventListener('click',e=>{
   const nform=e.target.closest('[data-newform]');if(nform){ACTCTX=nform.dataset.ctx||'assess';FORMEDIT=-1;FORMDRAFT={kind:'Pre-test',qs:[]};render('formnew');return;}
   const eform=e.target.closest('[data-editform]');if(eform){ACTCTX=document.querySelector('.tabs[data-tabs="course"]')?'course':'assess';openFormEdit(parseInt(eform.dataset.editform,10));return;}
   const vresp=e.target.closest('[data-viewresp]');if(vresp){const p=vresp.dataset.viewresp.split(':');FRESP_FID=parseInt(p[0],10);FRESP_SI=parseInt(p[1],10);if(vresp.dataset.sctx==='student'){FRESP_BACK='student';const st=STUDENTS.find(x=>x.id===SELSTU)||STUDENTS[0];FRESP_SNAME=st.nm;}else{FRESP_BACK=document.querySelector('.tabs[data-tabs="course"]')?'course':'assess';FRESP_SNAME=(STUDENTS.slice(0,10)[FRESP_SI]||STUDENTS[0]).nm;}render('formresp');return;}
-  if(e.target.closest('[data-formresp-back]')){if(FRESP_BACK==='student'){render('student');}else if(FRESP_BACK==='course'){render('course');const tb=document.querySelector('.tabs[data-tabs="course"] button[data-p="assess"]');if(tb)tb.click();}else{render('assess');}return;}
+  if(e.target.closest('[data-formresp-back]')){if(FRESP_BACK==='student'){render('student');}else if(FRESP_BACK==='course'){render('course');const tb=document.querySelector('.tabs[data-tabs="course"] button[data-p="tests"]');if(tb)tb.click();}else{render('assess');}return;}
   const fsub=e.target.closest('[data-ftab]');if(fsub){const scope=fsub.closest('.acc-b')||fsub.closest('.subtabs').parentElement;const key=fsub.dataset.ftab;scope.querySelectorAll('.subtabs button').forEach(b=>b.classList.toggle('active',b===fsub));scope.querySelectorAll('[data-fpanel]').forEach(p=>{if(p.closest('.acc-b')===scope)p.style.display=p.dataset.fpanel===key?'':'none';});return;}
   const fqa=e.target.closest('[data-formq-add]');if(fqa){const q=document.getElementById('fq-q'),ty=document.getElementById('fq-type'),op=document.getElementById('fq-opts');const qt=q?q.value.trim():'';if(!qt){toast('c-amber','alert','Add the question','Type the question text first.');return;}const type=ty?ty.value:'mcq';let opts=[];if(type==='mcq'){opts=(op?op.value:'').split('\n').map(s=>s.trim()).filter(Boolean);if(opts.length<2){toast('c-amber','alert','Add options','Multiple-choice needs at least two options (one per line).');return;}}FORMDRAFT.qs.push({t:type,q:qt,opts:opts});renderFormQ();if(q)q.value='';if(op)op.value='';if(q)q.focus();return;}
   if(e.target.closest('[data-form-addq]')){openFormQModal();return;}
   const fqs=e.target.closest('[data-formq-save]');if(fqs){const q=document.getElementById('fq-q'),ty=document.getElementById('fq-type'),op=document.getElementById('fq-opts');const qt=q?q.value.trim():'';if(!qt){toast('c-amber','alert','Add the question','Type the question text first.');return;}const type=ty?ty.value:'mcq';let opts=[];if(type==='mcq'){opts=(op?op.value:'').split('\n').map(s=>s.trim()).filter(Boolean);if(opts.length<2){toast('c-amber','alert','Add options','Multiple-choice needs at least two options (one per line).');return;}}FORMDRAFT.qs.push({t:type,q:qt,opts:opts});closeModal();renderFormQ();return;}
   const fdq=e.target.closest('[data-form-delq]');if(fdq){FORMDRAFT.qs.splice(parseInt(fdq.dataset.formDelq,10),1);renderFormQ();return;}
-  if(e.target.closest('[data-form-publish]')){const ti=document.getElementById('fb-title'),ki=document.getElementById('fb-kind'),ba=document.getElementById('fb-batch');const title=ti?ti.value.trim():'';if(!title){toast('c-amber','alert','Add a title','Give the form a title before saving.');return;}if(!FORMDRAFT.qs.length){toast('c-amber','alert','No questions','Add at least one question before saving.');return;}const kind=ki?ki.value:'Pre-test';const bn=ba?ba.value:CLASSES[0].name;const cls=CLASSES.find(c=>c.name===bn);const editing=FORMEDIT>=0&&FORMS[FORMEDIT];if(editing){const ex=FORMS[FORMEDIT];ex.kind=kind;ex.batch=bn;ex.title=title;ex.questions=FORMDRAFT.qs.slice();}else{FORMS.unshift({id:Date.now(),kind:kind,batch:bn,title:title,responses:0,total:cls?cls.students:42,questions:FORMDRAFT.qs.slice()});}FORMEDIT=-1;const back=()=>{if(ACTCTX==='course'){render('course');const tb=document.querySelector('.tabs[data-tabs="course"] button[data-p="assess"]');if(tb)tb.click();}else{render('assess');}};confirmModal('c-green','check',editing?'Form saved':kind+' published','“'+title+'” '+(editing?'has been updated for ':'is live for ')+bn+'.','Done',back);return;}
+  if(e.target.closest('[data-form-publish]')){const ti=document.getElementById('fb-title'),ki=document.getElementById('fb-kind'),ba=document.getElementById('fb-batch');const title=ti?ti.value.trim():'';if(!title){toast('c-amber','alert','Add a title','Give the form a title before saving.');return;}if(!FORMDRAFT.qs.length){toast('c-amber','alert','No questions','Add at least one question before saving.');return;}const kind=ki?ki.value:'Pre-test';const bn=ba?ba.value:CLASSES[0].name;const cls=CLASSES.find(c=>c.name===bn);const editing=FORMEDIT>=0&&FORMS[FORMEDIT];if(editing){const ex=FORMS[FORMEDIT];ex.kind=kind;ex.batch=bn;ex.title=title;ex.questions=FORMDRAFT.qs.slice();}else{FORMS.unshift({id:Date.now(),kind:kind,batch:bn,title:title,responses:0,total:cls?cls.students:42,questions:FORMDRAFT.qs.slice()});}FORMEDIT=-1;const back=()=>{if(ACTCTX==='course'){render('course');const tb=document.querySelector('.tabs[data-tabs="course"] button[data-p="tests"]');if(tb)tb.click();}else{render('assess');}};confirmModal('c-green','check',editing?'Form saved':kind+' published','“'+title+'” '+(editing?'has been updated for ':'is live for ')+bn+'.','Done',back);return;}
   const fpv=e.target.closest('[data-formprev]');if(fpv){openFormPreview(parseInt(fpv.dataset.formprev,10));return;}
   const frv=e.target.closest('[data-formview]');if(frv){const p=frv.dataset.formview.split(':');openFormView(parseInt(p[0],10),parseInt(p[1],10));return;}
   const frp=e.target.closest('[data-formresp]');if(frp){openFormResponses(parseInt(frp.dataset.formresp,10));return;}
