@@ -571,7 +571,6 @@ V.student=()=>{
   <div style="flex:1;min-width:180px"><h2 style="font-size:var(--fs-pg);font-weight:700">${s.nm}</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">ID ${s.id} · 2022-Welder · Section A · ${em}</div></div>
   <div class="muted" style="font-size:var(--fs-meta);text-align:right">Mentor<br><b style="color:var(--ink);font-size:var(--fs-body)">You (Mateen Shaikh)</b></div>
 </div>
-<div class="infobox">${ic('info')}<div class="im"><b>Consolidated learner record.</b> This joins activity submissions, pre / post-test responses, mentoring history and discussion-forum engagement into one profile — there is no grading (FRD FR-4.5).</div></div>
 <div class="stats">
   <div class="stat"><span class="chip" style="background:${s.att>=75?'var(--ok-bg)':'var(--warn-bg)'};color:${ac}">${ic('check')}</span><div><div class="v">${s.att}%</div><div class="k">Attendance</div></div></div>
   <div class="stat">${chip('c-amber','clip')}<div><div class="v">${stuActs.length}</div><div class="k">Activities</div></div></div>
@@ -590,10 +589,9 @@ V.student=()=>{
     ${s.ses>0?SESLOG.filter(x=>x[1]===s.nm).concat(s.ses>1?[['12 May 2026',s.nm,'Introductory mentoring session and goal setting','Present']]:[]).map(x=>lrow(x[0],x[2],pill('p-ok',x[3]))).join('')||lrow('No sessions in current view','Earlier sessions accumulate in the longitudinal profile',pill('p-neu','—')):'<div class="muted" style="padding:8px 0">No mentoring sessions logged yet. Use Mentoring → Log session.</div>'}
   </div>
   <div data-body="frm" style="display:none">
-    ${forumLog.length?`<div class="infobox">${ic('info')}<div class="im"><b>Discussion responses.</b> Every reply ${s.nm.split(' ')[0]} has posted to discussions across the forum — ${forumLog.length} in total.</div></div>`+forumLog.map(f=>`<div class="lrow"><span class="chip c-green" style="width:38px;height:38px;border-radius:10px">${ic('chat')}</span><div style="flex:1;min-width:0"><div class="nm">${f.topic}</div><div class="mt" style="line-height:1.5">“${f.text}”</div><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">${f.batch}</div></div></div>`).join(''):'<div class="muted" style="padding:18px 0;text-align:center">No discussion contributions from this learner yet.</div>'}
+    ${forumLog.length?forumLog.map(f=>`<div class="lrow"><span class="chip c-green" style="width:38px;height:38px;border-radius:10px">${ic('chat')}</span><div style="flex:1;min-width:0"><div class="nm">${f.topic}</div><div class="mt" style="line-height:1.5">“${f.text}”</div><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">${f.batch}</div></div></div>`).join(''):'<div class="muted" style="padding:18px 0;text-align:center">No discussion contributions from this learner yet.</div>'}
   </div>
   <div data-body="cert" style="display:none">
-    <div class="infobox">${ic('info')}<div class="im"><b>Certificates earned.</b> ${s.nm.split(' ')[0]} has earned ${CERTS.length} certificate${CERTS.length===1?'':'s'} by completing batches. Open any to view the PDF.</div></div>
     ${CERTS.map(c=>`<div class="lrow"><span class="chip c-amber" style="width:38px;height:38px;border-radius:10px">${ic('award')}</span><div style="flex:1;min-width:0"><div class="nm">${c.course}</div><div class="mt">Issued ${c.date} · ${c.hours} training hours · ID ${c.id}</div></div><button class="btn btn-o btn-sm" data-viewcert="${c.id}">${ic('eye')} View certificate</button></div>`).join('')}
   </div>
 </div>`;};
@@ -650,7 +648,6 @@ function courseActivities(c){
 function courseForms(c){
   const forms=FORMS.filter(f=>f.batch===c.name);
   let body='<div class="head"><h3>Pre &amp; Post test</h3><button class="btn btn-p btn-sm" data-newform data-ctx="course">'+ic('plus')+' New form</button></div>';
-  body+='<div class="infobox" style="margin-top:0">'+ic('info')+'<div class="im"><b>Set up this batch’s knowledge forms.</b> A <b>Pre-test</b> runs at the start of the batch and a <b>Post-test</b> at the end — ungraded. Open one to preview it or review responses.</div></div>';
   body+=forms.length?forms.map(formRow).join(''):'<div class="muted" style="padding:16px 0;text-align:center">No pre / post-test forms for this batch yet — use <b>New form</b> to set one up.</div>';
   return body;
 }
@@ -842,12 +839,10 @@ V.assess=()=>`
         <button class="btn btn-p btn-sm" data-newact>${ic('plus')} New activity</button>
       </div>
     </div>
-    <div class="infobox" style="margin-top:0">${ic('info')}<div class="im"><b>Set a task, review what comes in.</b> Each activity carries a brief; trainees upload their submission (PDF, video or document). There is no scoring — open a submission to review it.</div></div>
     <div id="acts-list">${renderActs()}</div>
   </div>
   <div data-body="forms" style="display:none">
     <div class="head" style="flex-wrap:wrap;gap:10px"><h3>Pre &amp; Post test</h3><button class="btn btn-p btn-sm" data-newform>${ic('plus')} New form</button></div>
-    <div class="infobox" style="margin-top:0">${ic('info')}<div class="im"><b>Knowledge check, not a grade.</b> A <b>Pre-test</b> runs at the start of a batch to gauge where trainees stand; a <b>Post-test</b> runs at the end to see what they have gained. Review responses to understand each learner — nothing is scored.</div></div>
     ${FORMS.map(formRow).join('')}
   </div>
 </div>`;
@@ -900,7 +895,6 @@ V.formresp=()=>{
   <div style="flex:1;min-width:180px"><h2 style="font-size:var(--fs-pg);font-weight:700">${nm}</h2><div class="muted" style="font-size:var(--fs-meta);margin-top:3px">${f.kind} · ${f.title} · ${f.batch}</div></div>
   ${pill(f.kind==='Pre-test'?'p-info':'p-ok',f.kind)}
 </div>
-<div class="infobox">${ic('info')}<div class="im">${nm.split(' ')[0]}’s ${f.kind.toLowerCase()} response. Pre / post-test forms are <b>not scored</b> — use this to understand where the learner stands.</div></div>
 <div class="card">
   <div class="head"><h3>Answers</h3><span class="muted" style="font-size:var(--fs-meta)">${f.questions.length} questions</span></div>
   ${formAnswers(f,FRESP_SI)}
@@ -941,7 +935,6 @@ V.formnew=()=>`
     <div class="field" id="fq-opts-wrap"><label>Options — one per line <span class="muted">(multiple choice only)</span></label><textarea id="fq-opts" placeholder="Option A\nOption B\nOption C"></textarea></div>
     <button class="btn btn-p btn-sm" data-formq-add>${ic('plus')} Add question</button>
   </div>
-  <div class="infobox" style="margin-top:16px">${ic('info')}<div class="im">Add as many multiple-choice or open-text questions as you need, then <b>${FORMEDIT>=0?'Save form':'Publish form'}</b>. These forms are <b>not scored</b> — they capture where each trainee stands at the start or end of the batch.</div></div>
 </div>`;
 function renderFormQ(){
   const el=document.getElementById('fq-list');if(!el)return;
@@ -1047,7 +1040,6 @@ V.mentor=()=>{
     return '<div class="lrow"><span class="chip '+(s.status==='Completed'?'c-green':'')+'" style="width:38px;height:38px;border-radius:10px'+(s.status==='Missed'?';background:var(--bad-bg);color:var(--bad)':'')+'">'+ic(s.status==='Completed'?'check':'x')+'</span><div style="flex:1;min-width:0"><div class="nm">'+s.student+' · '+s.date+'</div><div class="mt">'+s.topic+(s.remark?' — “'+s.remark+'”':'')+'</div></div>'+pill(s.status==='Completed'?'p-ok':'p-bad',s.status)+(s.status==='Completed'?'<button class="btn btn-o btn-sm" data-remark="'+x.i+'" style="margin-left:10px">'+ic('edit')+' '+(s.remark?'Edit':'Add')+' remark</button>':'')+'</div>';
   }
   return `
-<div class="infobox">${ic('info')}<div class="im"><b>You mentor 5 trainees.</b> Schedule 1:1 sessions — the student accepts and joins via the meeting link. Once a session's time arrives, mark it <b>Completed</b> or <b>Missed</b>, and add a remark for completed sessions. <b>Student ratings are reviewed by the Program Office and are not shown to mentors.</b></div></div>
 <div class="stats">
   <div class="stat">${chip('c-sky','handshake')}<div><div class="v">5</div><div class="k">My mentees</div></div></div>
   <div class="stat">${chip('c-lav','calchk')}<div><div class="v">${upcoming.length}</div><div class="k">Upcoming sessions</div></div></div>
